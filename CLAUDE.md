@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+always answer in Japanese.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
@@ -15,13 +17,13 @@ This is a scalable TODO application practice project built with a microservices 
 ### Using Docker Compose (Recommended)
 ```bash
 # Start all services (frontend, backend, database)
-docker-compose up
+docker compose up
 
 # Start with rebuild
-docker-compose up --build
+docker compose up --build
 
 # Stop all services
-docker-compose down
+docker compose down
 ```
 
 ### Frontend (runs on port 3010)
