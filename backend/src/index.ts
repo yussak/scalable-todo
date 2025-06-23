@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import todoRoutes from './routes/todos';
 
 dotenv.config();
 
@@ -19,6 +20,8 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
+
+app.use('/api/todos', todoRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
