@@ -1,0 +1,41 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3010:3010"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: yarn dev
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "3011:3011"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@db:5432/myapp
+    command: yarn dev
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=myapp
+
+volumes:
+  postgres_data:
