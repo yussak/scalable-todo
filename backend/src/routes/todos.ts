@@ -38,4 +38,33 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const todoId = parseInt(id, 10);
+
+    if (isNaN(todoId)) {
+      res.status(400).json({ error: 'Invalid todo ID' });
+      return;
+    }
+
+    await prisma.todo.delete({
+      where: { id: todoId }
+    });
+
+    const remainingTodos = await prisma.todo.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json(remainingTodos);
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      res.status(404).json({ error: 'Todo not found' });
+    } else {
+      console.error('Error deleting todo:', error);
+      res.status(500).json({ error: 'Failed to delete todo' });
+    }
+  }
+});
+
 export default router;

@@ -39,10 +39,9 @@ describe("POST /api/todos", () => {
       description: "Test description",
     };
 
-    const response = await request(app)
-      .post("/api/todos")
-      .send(newTodo)
-      .expect(201);
+    const response = await request(app).post("/api/todos").send(newTodo);
+
+    expect(response.status).toBe(201);
 
     expect(response.body).toMatchObject({
       id: expect.any(Number),
@@ -53,7 +52,6 @@ describe("POST /api/todos", () => {
       updatedAt: expect.any(String),
     });
 
-    // DBに実際に保存されているか確認
     const savedTodo = await testPrisma.todo.findUnique({
       where: { id: response.body.id },
     });
@@ -72,8 +70,9 @@ describe("GET /api/todos", () => {
   });
 
   it("should return empty array when no todos exist", async () => {
-    const response = await request(app).get("/api/todos").expect(200);
+    const response = await request(app).get("/api/todos");
 
+    expect(response.status).toBe(200);
     expect(response.body).toEqual([]);
   });
 
@@ -101,7 +100,9 @@ describe("GET /api/todos", () => {
       data: testTodos,
     });
 
-    const response = await request(app).get("/api/todos").expect(200);
+    const response = await request(app).get("/api/todos");
+
+    expect(response.status).toBe(200);
 
     // 3件のTodoが返されることを確認
     expect(response.body).toHaveLength(3);
@@ -117,5 +118,51 @@ describe("GET /api/todos", () => {
         updatedAt: expect.any(String),
       });
     });
+  });
+});
+
+describe("DELETE /api/todos/:id", () => {
+  beforeEach(async () => {
+    await testPrisma.todo.deleteMany();
+  });
+
+  it("should return 404 when todo not found", async () => {
+    const response = await request(app).delete("/api/todos/999");
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ error: "Todo not found" });
+  });
+
+  it("should delete todo", async () => {
+    // テストデータを作成
+    const testTodos = [
+      {
+        id: 1,
+        title: "Todo 1",
+        description: "Description 1",
+        completed: false,
+      },
+      {
+        id: 2,
+        title: "Todo 2",
+        description: "Description 2",
+        completed: true,
+      },
+      {
+        id: 3,
+        title: "Todo 3",
+        description: "Description 3",
+        completed: false,
+      },
+    ];
+
+    await testPrisma.todo.createMany({
+      data: testTodos,
+    });
+
+    const response = await request(app).delete("/api/todos/2");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveLength(2);
   });
 });

@@ -58,6 +58,21 @@ export default function Home() {
     }
   };
 
+  const deleteTodo = async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:3011/api/todos/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const updatedTodos = await response.json();
+        setTodos(updatedTodos);
+      }
+    } catch (error) {
+      console.error('Failed to delete todo:', error);
+    }
+  };
+
   useEffect(() => {
     fetchTodos();
   }, []);
@@ -122,17 +137,25 @@ export default function Home() {
                 {todo.description && (
                   <p className="text-gray-600 mb-4">{todo.description}</p>
                 )}
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    todo.completed 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {todo.completed ? '完了' : '未完了'}
-                  </span>
-                  <span>
-                    {new Date(todo.createdAt).toLocaleDateString('ja-JP')}
-                  </span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      todo.completed 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {todo.completed ? '完了' : '未完了'}
+                    </span>
+                    <span>
+                      {new Date(todo.createdAt).toLocaleDateString('ja-JP')}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => deleteTodo(todo.id)}
+                    className="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    削除
+                  </button>
                 </div>
               </div>
             ))
