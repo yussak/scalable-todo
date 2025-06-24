@@ -38,6 +38,42 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+router.put('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { title, description, completed } = req.body;
+    const todoId = parseInt(id, 10);
+
+    if (isNaN(todoId)) {
+      res.status(400).json({ error: 'Invalid todo ID' });
+      return;
+    }
+
+    if (!title || title.trim() === '') {
+      res.status(400).json({ error: 'Title is required' });
+      return;
+    }
+
+    const updatedTodo = await prisma.todo.update({
+      where: { id: todoId },
+      data: {
+        title: title.trim(),
+        description: description !== undefined ? description : undefined,
+        completed: completed !== undefined ? completed : undefined,
+      }
+    });
+
+    res.json(updatedTodo);
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      res.status(404).json({ error: 'Todo not found' });
+    } else {
+      console.error('Error updating todo:', error);
+      res.status(500).json({ error: 'Failed to update todo' });
+    }
+  }
+});
+
 router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;

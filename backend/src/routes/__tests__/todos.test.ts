@@ -166,3 +166,79 @@ describe("DELETE /api/todos/:id", () => {
     expect(response.body).toHaveLength(2);
   });
 });
+
+describe("PUT /api/todos/:id", () => {
+  beforeEach(async () => {
+    await testPrisma.todo.deleteMany();
+  });
+
+  it("should return 404 when todo not found", async () => {
+    const updateData = {
+      title: "Updated Todo",
+      description: "Updated Description",
+      completed: true,
+    };
+
+    const response = await request(app).put("/api/todos/999").send(updateData);
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ error: "Todo not found" });
+  });
+
+  it("should return 400 when title is empty", async () => {
+    const createdTodo = await testPrisma.todo.create({
+      data: {
+        title: "Original Todo",
+        description: "Original Description",
+      },
+    });
+
+    const response = await request(app)
+      .put(`/api/todos/${createdTodo.id}`)
+      .send({
+        title: "",
+        description: "Updated Description",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: "Title is required" });
+  });
+
+  it("should update a todo successfully", async () => {
+    const createdTodo = await testPrisma.todo.create({
+      data: {
+        title: "Original Todo",
+        description: "Original Description",
+        completed: false,
+      },
+    });
+
+    const updateData = {
+      title: "Updated Todo",
+      description: "Updated Description",
+      completed: true,
+    };
+
+    const response = await request(app)
+      .put(`/api/todos/${createdTodo.id}`)
+      .send(updateData);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      id: createdTodo.id,
+      title: "Updated Todo",
+      description: "Updated Description",
+      completed: true,
+    });
+
+    const savedTodo = await testPrisma.todo.findUnique({
+      where: { id: createdTodo.id },
+    });
+
+    expect(savedTodo).toMatchObject({
+      title: "Updated Todo",
+      description: "Updated Description",
+      completed: true,
+    });
+  });
+});
