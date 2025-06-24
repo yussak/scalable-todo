@@ -65,3 +65,57 @@ describe("POST /api/todos", () => {
     });
   });
 });
+
+describe("GET /api/todos", () => {
+  beforeEach(async () => {
+    await testPrisma.todo.deleteMany();
+  });
+
+  it("should return empty array when no todos exist", async () => {
+    const response = await request(app).get("/api/todos").expect(200);
+
+    expect(response.body).toEqual([]);
+  });
+
+  it("should return all todos when multiple todos exist", async () => {
+    // テストデータを作成
+    const testTodos = [
+      {
+        title: "Todo 1",
+        description: "Description 1",
+        completed: false,
+      },
+      {
+        title: "Todo 2",
+        description: "Description 2",
+        completed: true,
+      },
+      {
+        title: "Todo 3",
+        description: "Description 3",
+        completed: false,
+      },
+    ];
+
+    await testPrisma.todo.createMany({
+      data: testTodos,
+    });
+
+    const response = await request(app).get("/api/todos").expect(200);
+
+    // 3件のTodoが返されることを確認
+    expect(response.body).toHaveLength(3);
+
+    // 各Todoの内容を確認
+    response.body.forEach((todo: any, index: number) => {
+      expect(todo).toMatchObject({
+        id: expect.any(Number),
+        title: testTodos[index].title,
+        description: testTodos[index].description,
+        completed: testTodos[index].completed,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      });
+    });
+  });
+});
