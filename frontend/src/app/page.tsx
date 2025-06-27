@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface Todo {
   id: number;
@@ -13,23 +13,23 @@ interface Todo {
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [editCompleted, setEditCompleted] = useState(false);
 
   const fetchTodos = async () => {
     try {
-      const response = await fetch('http://localhost:3011/api/todos');
+      const response = await fetch("http://localhost:3011/api/todos");
       if (response.ok) {
         const data = await response.json();
         setTodos(data);
       }
     } catch (error) {
-      console.error('Failed to fetch todos:', error);
+      console.error("Failed to fetch todos:", error);
     }
   };
 
@@ -39,10 +39,10 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3011/api/todos', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3011/api/todos", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           title: title.trim(),
@@ -51,12 +51,12 @@ export default function Home() {
       });
 
       if (response.ok) {
-        setTitle('');
-        setDescription('');
+        setTitle("");
+        setDescription("");
         fetchTodos();
       }
     } catch (error) {
-      console.error('Failed to create todo:', error);
+      console.error("Failed to create todo:", error);
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export default function Home() {
   const deleteTodo = async (id: number) => {
     try {
       const response = await fetch(`http://localhost:3011/api/todos/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
@@ -73,21 +73,21 @@ export default function Home() {
         setTodos(updatedTodos);
       }
     } catch (error) {
-      console.error('Failed to delete todo:', error);
+      console.error("Failed to delete todo:", error);
     }
   };
 
   const startEdit = (todo: Todo) => {
     setEditingId(todo.id);
     setEditTitle(todo.title);
-    setEditDescription(todo.description || '');
+    setEditDescription(todo.description || "");
     setEditCompleted(todo.completed);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditTitle('');
-    setEditDescription('');
+    setEditTitle("");
+    setEditDescription("");
     setEditCompleted(false);
   };
 
@@ -96,9 +96,9 @@ export default function Home() {
 
     try {
       const response = await fetch(`http://localhost:3011/api/todos/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           title: editTitle.trim(),
@@ -109,11 +109,11 @@ export default function Home() {
 
       if (response.ok) {
         const updatedTodo = await response.json();
-        setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo));
+        setTodos(todos.map((todo) => (todo.id === id ? updatedTodo : todo)));
         cancelEdit();
       }
     } catch (error) {
-      console.error('Failed to update todo:', error);
+      console.error("Failed to update todo:", error);
     }
   };
 
@@ -123,13 +123,13 @@ export default function Home() {
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && editingId !== null) {
+      if (e.key === "Escape" && editingId !== null) {
         cancelEdit();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [editingId]);
 
   return (
@@ -139,9 +139,15 @@ export default function Home() {
           TODO アプリ
         </h1>
 
-        <form onSubmit={createTodo} className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <form
+          onSubmit={createTodo}
+          className="bg-white rounded-lg shadow-md p-6 mb-8"
+        >
           <div className="mb-4">
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               タイトル
             </label>
             <input
@@ -154,9 +160,12 @@ export default function Home() {
               required
             />
           </div>
-          
+
           <div className="mb-4">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               説明（任意）
             </label>
             <textarea
@@ -174,7 +183,7 @@ export default function Home() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {loading ? '作成中...' : 'TODO作成'}
+            {loading ? "作成中..." : "TODO作成"}
           </button>
         </form>
 
@@ -212,7 +221,10 @@ export default function Home() {
                         onChange={(e) => setEditCompleted(e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                      <label htmlFor={`completed-${todo.id}`} className="text-sm text-gray-700">
+                      <label
+                        htmlFor={`completed-${todo.id}`}
+                        className="text-sm text-gray-700"
+                      >
                         完了済み
                       </label>
                     </div>
@@ -242,15 +254,17 @@ export default function Home() {
                     )}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          todo.completed 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {todo.completed ? '完了' : '未完了'}
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            todo.completed
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {todo.completed ? "完了" : "未完了"}
                         </span>
                         <span>
-                          {new Date(todo.createdAt).toLocaleDateString('ja-JP')}
+                          {new Date(todo.createdAt).toLocaleDateString("ja-JP")}
                         </span>
                       </div>
                       <div className="flex gap-2">
