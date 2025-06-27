@@ -119,18 +119,18 @@ describe("Auth Routes", () => {
       });
     });
 
-    // it('必須フィールドが欠けている場合はエラーを返す', async () => {
-    //   const response = await request(app)
-    //     .post('/api/auth/register')
-    //     .send({
-    //       email: 'test@example.com',
-    //     });
+    it('必須フィールドが欠けている場合はエラーを返す', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'test@example.com',
+        });
 
-    //   expect(response.status).toBe(400);
-    //   expect(response.body).toEqual({
-    //     error: 'Email and password are required',
-    //   });
-    // });
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: 'Email and password are required',
+      });
+    });
   });
 
   describe("POST /api/auth/login", () => {
@@ -213,18 +213,18 @@ describe("Auth Routes", () => {
     });
   });
 
-  //   it('必須フィールドが欠けている場合はエラーを返す', async () => {
-  //     const response = await request(app)
-  //       .post('/api/auth/login')
-  //       .send({
-  //         email: 'test@example.com',
-  //       });
+  it('必須フィールドが欠けている場合はエラーを返す', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: 'test@example.com',
+      });
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body).toEqual({
-  //       error: 'Email and password are required',
-  //     });
-  //   });
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: 'Email and password are required',
+    });
+  });
   // });
 
   // describe('認証ミドルウェア', () => {

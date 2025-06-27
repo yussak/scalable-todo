@@ -12,6 +12,11 @@ authRouter.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // 必須フィールドのチェック
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
     // メール形式のバリデーション
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -60,6 +65,11 @@ authRouter.post("/register", async (req, res) => {
 authRouter.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // 必須フィールドのチェック
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
 
     const user = await prisma.user.findUnique({
       where: { email },
