@@ -34,8 +34,14 @@ describe("POST /api/todos", () => {
   // 各テスト前にデータクリアとテストユーザー作成
   beforeEach(async () => {
     await testPrisma.todo.deleteMany();
-    // 既存のテストユーザーを使用（ID: 1）
-    testUser = { id: 1 };
+    await testPrisma.user.deleteMany();
+    // テストユーザーを作成
+    testUser = await testPrisma.user.create({
+      data: {
+        email: "testuser@example.test",
+        password: "hashedPassword123",
+      },
+    });
   });
   it("should create a new todo successfully", async () => {
     const newTodo = {
@@ -58,7 +64,7 @@ describe("POST /api/todos", () => {
       updatedAt: expect.any(String),
       user: expect.objectContaining({
         id: testUser.id,
-        email: "test@example.com",
+        email: "testuser@example.test",
       }),
     });
 
@@ -80,8 +86,14 @@ describe("GET /api/todos", () => {
 
   beforeEach(async () => {
     await testPrisma.todo.deleteMany();
-    // 既存のテストユーザーを使用（ID: 1）
-    testUser = { id: 1 };
+    await testPrisma.user.deleteMany();
+    // テストユーザーを作成
+    testUser = await testPrisma.user.create({
+      data: {
+        email: "testuser@example.test",
+        password: "hashedPassword123",
+      },
+    });
   });
 
   it("should return empty array when no todos exist", async () => {
@@ -137,7 +149,7 @@ describe("GET /api/todos", () => {
         updatedAt: expect.any(String),
         user: expect.objectContaining({
           id: testUser.id,
-          email: "test@example.com",
+          email: "testuser@example.test",
         }),
       });
     });
@@ -149,8 +161,14 @@ describe("DELETE /api/todos/:id", () => {
 
   beforeEach(async () => {
     await testPrisma.todo.deleteMany();
-    // 既存のテストユーザーを使用（ID: 1）
-    testUser = { id: 1 };
+    await testPrisma.user.deleteMany();
+    // テストユーザーを作成
+    testUser = await testPrisma.user.create({
+      data: {
+        email: "testuser@example.test",
+        password: "hashedPassword123",
+      },
+    });
   });
 
   it("should return 404 when todo not found", async () => {
@@ -203,8 +221,14 @@ describe("PUT /api/todos/:id", () => {
 
   beforeEach(async () => {
     await testPrisma.todo.deleteMany();
-    // 既存のテストユーザーを使用（ID: 1）
-    testUser = { id: 1 };
+    await testPrisma.user.deleteMany();
+    // テストユーザーを作成
+    testUser = await testPrisma.user.create({
+      data: {
+        email: "testuser@example.test",
+        password: "hashedPassword123",
+      },
+    });
   });
 
   it("should return 404 when todo not found", async () => {
