@@ -67,57 +67,57 @@ describe("Auth Routes", () => {
       });
     });
 
-    // it('既存のメールアドレスでは登録できない', async () => {
-    //   const existingUser = {
-    //     id: 1,
-    //     email: 'existing@example.com',
-    //     password: 'hashedPassword',
-    //     createdAt: new Date(),
-    //     updatedAt: new Date(),
-    //   };
+    it('既存のメールアドレスでは登録できない', async () => {
+      const existingUser = {
+        id: 1,
+        email: 'existing@example.com',
+        password: 'hashedPassword',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-    //   vi.mocked(prisma.user.findUnique).mockResolvedValue(existingUser);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(existingUser);
 
-    //   const response = await request(app)
-    //     .post('/api/auth/register')
-    //     .send({
-    //       email: 'existing@example.com',
-    //       password: 'password123',
-    //     });
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'existing@example.com',
+          password: 'password123',
+        });
 
-    //   expect(response.status).toBe(400);
-    //   expect(response.body).toEqual({
-    //     error: 'User already exists',
-    //   });
-    // });
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: 'User already exists',
+      });
+    });
 
-    // it('メールアドレスが不正な形式の場合はエラーを返す', async () => {
-    //   const response = await request(app)
-    //     .post('/api/auth/register')
-    //     .send({
-    //       email: 'invalid-email',
-    //       password: 'password123',
-    //     });
+    it('メールアドレスが不正な形式の場合はエラーを返す', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'invalid-email',
+          password: 'password123',
+        });
 
-    //   expect(response.status).toBe(400);
-    //   expect(response.body).toEqual({
-    //     error: 'Invalid email format',
-    //   });
-    // });
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: 'Invalid email format',
+      });
+    });
 
-    // it('パスワードが短すぎる場合はエラーを返す', async () => {
-    //   const response = await request(app)
-    //     .post('/api/auth/register')
-    //     .send({
-    //       email: 'test@example.com',
-    //       password: '123',
-    //     });
+    it('パスワードが短すぎる場合はエラーを返す', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'test@example.com',
+          password: '123',
+        });
 
-    //   expect(response.status).toBe(400);
-    //   expect(response.body).toEqual({
-    //     error: 'Password must be at least 6 characters',
-    //   });
-    // });
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: 'Password must be at least 6 characters',
+      });
+    });
 
     // it('必須フィールドが欠けている場合はエラーを返す', async () => {
     //   const response = await request(app)
