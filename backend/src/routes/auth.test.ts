@@ -4,11 +4,11 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { authRouter } from "./auth";
-import { prisma } from "../prisma";
+import prisma from "../prisma";
 
 // Prismaのモック
 vi.mock("../prisma", () => ({
-  prisma: {
+  default: {
     user: {
       findUnique: vi.fn(),
       create: vi.fn(),
@@ -56,9 +56,9 @@ describe("Auth Routes", () => {
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashedPassword");
+      vi.mocked(bcrypt.hash).mockResolvedValue("hashedPassword" as any);
       vi.mocked(prisma.user.create).mockResolvedValue(mockUser);
-      vi.mocked(jwt.sign).mockReturnValue("mockToken");
+      vi.mocked(jwt.sign).mockReturnValue("mockToken" as any);
 
       const response = await request(app).post("/api/auth/register").send({
         email: "test@example.com",
