@@ -139,38 +139,40 @@ describe("Auth Routes", () => {
     // });
   });
 
-  // describe('POST /api/auth/login', () => {
-  //   it('正しい認証情報でログインできる', async () => {
-  //     const mockUser = {
-  //       id: 1,
-  //       email: 'test@example.com',
-  //       password: 'hashedPassword',
-  //       createdAt: new Date(),
-  //       updatedAt: new Date(),
-  //     };
+  describe("POST /api/auth/login", () => {
+    it("正しい認証情報でログインできる", async () => {
+      const mockUser = {
+        id: 1,
+        email: "test@example.com",
+        password: "hashedPassword",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-  //     vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
-  //     vi.mocked(bcrypt.compare).mockResolvedValue(true);
-  //     vi.mocked(jwt.sign).mockReturnValue('mockToken');
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
+      vi.mocked(bcrypt.compare).mockResolvedValue(true);
+      vi.mocked(jwt.sign).mockReturnValue("mockToken" as any);
 
-  //     const response = await request(app)
-  //       .post('/api/auth/login')
-  //       .send({
-  //         email: 'test@example.com',
-  //         password: 'password123',
-  //       });
+      const response = await request(app).post("/api/auth/login").send({
+        email: "test@example.com",
+        password: "password123",
+      });
 
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toEqual({
-  //       message: 'Login successful',
-  //       user: {
-  //         id: mockUser.id,
-  //         email: mockUser.email,
-  //       },
-  //       token: 'mockToken',
-  //     });
-  //     expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashedPassword');
-  //   });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        message: "Login successful",
+        user: {
+          id: mockUser.id,
+          email: mockUser.email,
+        },
+        token: "mockToken",
+      });
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        "password123",
+        "hashedPassword"
+      );
+    });
+  });
 
   //   it('存在しないユーザーではログインできない', async () => {
   //     vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
