@@ -5,7 +5,22 @@ const router = Router();
 
 router.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      res.status(400).json({ error: "userId is required" });
+      return;
+    }
+
+    const userIdNum = parseInt(userId as string, 10);
+    if (isNaN(userIdNum)) {
+      res.status(400).json({ error: "Invalid userId" });
+      return;
+    }
+
     const todos = await prisma.todo.findMany({
+      where: { userId: userIdNum },
+      include: { user: true },
       orderBy: { createdAt: "desc" },
     });
     res.json(todos);
@@ -17,10 +32,21 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
 
 router.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, description } = req.body;
+    const { title, description, userId } = req.body;
 
     if (!title) {
       res.status(400).json({ error: "Title is required" });
+      return;
+    }
+
+    if (!userId) {
+      res.status(400).json({ error: "userId is required" });
+      return;
+    }
+
+    const userIdNum = parseInt(userId, 10);
+    if (isNaN(userIdNum)) {
+      res.status(400).json({ error: "Invalid userId" });
       return;
     }
 
@@ -28,7 +54,9 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       data: {
         title,
         description: description || null,
+        userId: userIdNum,
       },
+      include: { user: true },
     });
 
     res.status(201).json(todo);
@@ -41,7 +69,7 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
 router.put("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, description, completed } = req.body;
+    const { title, description, completed, userId } = req.body;
     const todoId = parseInt(id, 10);
 
     if (isNaN(todoId)) {
@@ -54,13 +82,25 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (!userId) {
+      res.status(400).json({ error: "userId is required" });
+      return;
+    }
+
+    const userIdNum = parseInt(userId, 10);
+    if (isNaN(userIdNum)) {
+      res.status(400).json({ error: "Invalid userId" });
+      return;
+    }
+
     const updatedTodo = await prisma.todo.update({
-      where: { id: todoId },
+      where: { id: todoId, userId: userIdNum },
       data: {
         title: title.trim(),
         description: description !== undefined ? description : undefined,
         completed: completed !== undefined ? completed : undefined,
       },
+      include: { user: true },
     });
 
     res.json(updatedTodo);
@@ -77,6 +117,7 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
 router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const { userId } = req.body;
     const todoId = parseInt(id, 10);
 
     if (isNaN(todoId)) {
@@ -84,11 +125,24 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (!userId) {
+      res.status(400).json({ error: "userId is required" });
+      return;
+    }
+
+    const userIdNum = parseInt(userId, 10);
+    if (isNaN(userIdNum)) {
+      res.status(400).json({ error: "Invalid userId" });
+      return;
+    }
+
     await prisma.todo.delete({
-      where: { id: todoId },
+      where: { id: todoId, userId: userIdNum },
     });
 
     const remainingTodos = await prisma.todo.findMany({
+      where: { userId: userIdNum },
+      include: { user: true },
       orderBy: { createdAt: "desc" },
     });
 

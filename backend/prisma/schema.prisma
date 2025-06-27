@@ -18,8 +18,11 @@ model Todo {
   title       String
   description String?
   completed   Boolean  @default(false)
+  userId      Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("todos")
 }
@@ -30,6 +33,8 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  todos     Todo[]
 
   @@map("users")
 }

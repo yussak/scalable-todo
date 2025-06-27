@@ -7,8 +7,13 @@ interface Todo {
   title: string;
   description: string | null;
   completed: boolean;
+  userId: number;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    id: number;
+    email: string;
+  };
 }
 
 export default function Home() {
@@ -20,10 +25,13 @@ export default function Home() {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editCompleted, setEditCompleted] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   const fetchTodos = async () => {
+    if (!currentUserId) return;
+    
     try {
-      const response = await fetch("http://localhost:3011/api/todos");
+      const response = await fetch(`http://localhost:3011/api/todos?userId=${currentUserId}`);
       if (response.ok) {
         const data = await response.json();
         setTodos(data);
@@ -35,7 +43,7 @@ export default function Home() {
 
   const createTodo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || !currentUserId) return;
 
     setLoading(true);
     try {
@@ -47,6 +55,7 @@ export default function Home() {
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim() || null,
+          userId: currentUserId,
         }),
       });
 
@@ -63,9 +72,17 @@ export default function Home() {
   };
 
   const deleteTodo = async (id: number) => {
+    if (!currentUserId) return;
+    
     try {
       const response = await fetch(`http://localhost:3011/api/todos/${id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: currentUserId,
+        }),
       });
 
       if (response.ok) {
@@ -92,7 +109,7 @@ export default function Home() {
   };
 
   const updateTodo = async (id: number) => {
-    if (!editTitle.trim()) return;
+    if (!editTitle.trim() || !currentUserId) return;
 
     try {
       const response = await fetch(`http://localhost:3011/api/todos/${id}`, {
@@ -104,6 +121,7 @@ export default function Home() {
           title: editTitle.trim(),
           description: editDescription.trim() || null,
           completed: editCompleted,
+          userId: currentUserId,
         }),
       });
 
@@ -118,8 +136,15 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchTodos();
+    // 仮のユーザーID（後で認証機能と連携）
+    setCurrentUserId(2);
   }, []);
+
+  useEffect(() => {
+    if (currentUserId) {
+      fetchTodos();
+    }
+  }, [currentUserId]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -138,6 +163,14 @@ export default function Home() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
           TODO アプリ
         </h1>
+        
+        {currentUserId && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p className="text-blue-800 text-sm">
+              ユーザーID: {currentUserId} でログイン中
+            </p>
+          </div>
+        )}
 
         <form
           onSubmit={createTodo}

@@ -158,65 +158,64 @@ describe("Auth Routes", () => {
         token: "mockToken",
       });
     });
+
+    it("存在しないユーザーではログインできない", async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
+
+      const response = await request(app).post("/api/auth/login").send({
+        email: "nonexistent@example.com",
+        password: "password123",
+      });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({
+        error: "Invalid credentials",
+      });
+
+      // prisma.user.findUniqueが呼ばれていることを確認
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: "nonexistent@example.com" },
+      });
+    });
+
+    it("間違ったパスワードではログインできない", async () => {
+      // 実際にパスワードをハッシュ化
+      const plainPassword = "password123";
+      const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+      const mockUser = {
+        id: 1,
+        email: "test@example.com",
+        password: hashedPassword, // 実際にハッシュ化されたパスワード
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
+
+      const response = await request(app).post("/api/auth/login").send({
+        email: "test@example.com",
+        // password: "password123", // 正しいパスワード
+        password: "wrongpassword", // 間違ったパスワード
+      });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({
+        error: "Invalid credentials",
+      });
+    });
+
+    it("必須フィールドが欠けている場合はエラーを返す", async () => {
+      const response = await request(app).post("/api/auth/login").send({
+        email: "test@example.com",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: "Email and password are required",
+      });
+    });
   });
-
-  it("存在しないユーザーではログインできない", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-
-    const response = await request(app).post("/api/auth/login").send({
-      email: "nonexistent@example.com",
-      password: "password123",
-    });
-
-    expect(response.status).toBe(401);
-    expect(response.body).toEqual({
-      error: "Invalid credentials",
-    });
-
-    // prisma.user.findUniqueが呼ばれていることを確認
-    expect(prisma.user.findUnique).toHaveBeenCalledWith({
-      where: { email: "nonexistent@example.com" },
-    });
-  });
-
-  it("間違ったパスワードではログインできない", async () => {
-    // 実際にパスワードをハッシュ化
-    const plainPassword = "password123";
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
-
-    const mockUser = {
-      id: 1,
-      email: "test@example.com",
-      password: hashedPassword, // 実際にハッシュ化されたパスワード
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
-
-    const response = await request(app).post("/api/auth/login").send({
-      email: "test@example.com",
-      // password: "password123", // 正しいパスワード
-      password: "wrongpassword", // 間違ったパスワード
-    });
-
-    expect(response.status).toBe(401);
-    expect(response.body).toEqual({
-      error: "Invalid credentials",
-    });
-  });
-
-  it("必須フィールドが欠けている場合はエラーを返す", async () => {
-    const response = await request(app).post("/api/auth/login").send({
-      email: "test@example.com",
-    });
-
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({
-      error: "Email and password are required",
-    });
-  });
-  // });
 
   describe("認証ミドルウェア", () => {
     it("有効なトークンでリクエストが通る", async () => {

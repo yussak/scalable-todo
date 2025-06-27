@@ -29,14 +29,19 @@ app.use(express.json());
 app.use("/api/todos", todoRoutes.default);
 
 describe("POST /api/todos", () => {
-  // 各テスト前にデータクリア
+  let testUser: any;
+
+  // 各テスト前にデータクリアとテストユーザー作成
   beforeEach(async () => {
     await testPrisma.todo.deleteMany();
+    // 既存のテストユーザーを使用（ID: 1）
+    testUser = { id: 1 };
   });
   it("should create a new todo successfully", async () => {
     const newTodo = {
       title: "Test Todo",
       description: "Test description",
+      userId: testUser.id,
     };
 
     const response = await request(app).post("/api/todos").send(newTodo);
@@ -48,8 +53,13 @@ describe("POST /api/todos", () => {
       title: "Test Todo",
       description: "Test description",
       completed: false,
+      userId: testUser.id,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
+      user: expect.objectContaining({
+        id: testUser.id,
+        email: "test@example.com",
+      }),
     });
 
     const savedTodo = await testPrisma.todo.findUnique({
@@ -60,17 +70,22 @@ describe("POST /api/todos", () => {
       title: "Test Todo",
       description: "Test description",
       completed: false,
+      userId: testUser.id,
     });
   });
 });
 
 describe("GET /api/todos", () => {
+  let testUser: any;
+
   beforeEach(async () => {
     await testPrisma.todo.deleteMany();
+    // 既存のテストユーザーを使用（ID: 1）
+    testUser = { id: 1 };
   });
 
   it("should return empty array when no todos exist", async () => {
-    const response = await request(app).get("/api/todos");
+    const response = await request(app).get(`/api/todos?userId=${testUser.id}`);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual([]);
@@ -83,16 +98,19 @@ describe("GET /api/todos", () => {
         title: "Todo 1",
         description: "Description 1",
         completed: false,
+        userId: testUser.id,
       },
       {
         title: "Todo 2",
         description: "Description 2",
         completed: true,
+        userId: testUser.id,
       },
       {
         title: "Todo 3",
         description: "Description 3",
         completed: false,
+        userId: testUser.id,
       },
     ];
 
@@ -100,7 +118,7 @@ describe("GET /api/todos", () => {
       data: testTodos,
     });
 
-    const response = await request(app).get("/api/todos");
+    const response = await request(app).get(`/api/todos?userId=${testUser.id}`);
 
     expect(response.status).toBe(200);
 
@@ -114,20 +132,31 @@ describe("GET /api/todos", () => {
         title: testTodos[index].title,
         description: testTodos[index].description,
         completed: testTodos[index].completed,
+        userId: testUser.id,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
+        user: expect.objectContaining({
+          id: testUser.id,
+          email: "test@example.com",
+        }),
       });
     });
   });
 });
 
 describe("DELETE /api/todos/:id", () => {
+  let testUser: any;
+
   beforeEach(async () => {
     await testPrisma.todo.deleteMany();
+    // 既存のテストユーザーを使用（ID: 1）
+    testUser = { id: 1 };
   });
 
   it("should return 404 when todo not found", async () => {
-    const response = await request(app).delete("/api/todos/999");
+    const response = await request(app)
+      .delete("/api/todos/999")
+      .send({ userId: testUser.id });
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ error: "Todo not found" });
@@ -137,30 +166,32 @@ describe("DELETE /api/todos/:id", () => {
     // テストデータを作成
     const testTodos = [
       {
-        id: 1,
         title: "Todo 1",
         description: "Description 1",
         completed: false,
+        userId: testUser.id,
       },
       {
-        id: 2,
         title: "Todo 2",
         description: "Description 2",
         completed: true,
+        userId: testUser.id,
       },
       {
-        id: 3,
         title: "Todo 3",
         description: "Description 3",
         completed: false,
+        userId: testUser.id,
       },
     ];
 
-    await testPrisma.todo.createMany({
-      data: testTodos,
-    });
+    const createdTodos = await Promise.all(
+      testTodos.map((todo) => testPrisma.todo.create({ data: todo }))
+    );
 
-    const response = await request(app).delete("/api/todos/2");
+    const response = await request(app)
+      .delete(`/api/todos/${createdTodos[1].id}`)
+      .send({ userId: testUser.id });
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(2);
@@ -168,8 +199,12 @@ describe("DELETE /api/todos/:id", () => {
 });
 
 describe("PUT /api/todos/:id", () => {
+  let testUser: any;
+
   beforeEach(async () => {
     await testPrisma.todo.deleteMany();
+    // 既存のテストユーザーを使用（ID: 1）
+    testUser = { id: 1 };
   });
 
   it("should return 404 when todo not found", async () => {
@@ -177,6 +212,7 @@ describe("PUT /api/todos/:id", () => {
       title: "Updated Todo",
       description: "Updated Description",
       completed: true,
+      userId: testUser.id,
     };
 
     const response = await request(app).put("/api/todos/999").send(updateData);
@@ -190,6 +226,7 @@ describe("PUT /api/todos/:id", () => {
       data: {
         title: "Original Todo",
         description: "Original Description",
+        userId: testUser.id,
       },
     });
 
@@ -210,6 +247,7 @@ describe("PUT /api/todos/:id", () => {
         title: "Original Todo",
         description: "Original Description",
         completed: false,
+        userId: testUser.id,
       },
     });
 
@@ -217,6 +255,7 @@ describe("PUT /api/todos/:id", () => {
       title: "Updated Todo",
       description: "Updated Description",
       completed: true,
+      userId: testUser.id,
     };
 
     const response = await request(app)
