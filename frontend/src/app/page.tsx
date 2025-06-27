@@ -136,8 +136,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // 仮のユーザーID（後で認証機能と連携）
-    setCurrentUserId(2);
+    // localStorageからユーザー情報を取得
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      setCurrentUserId(user.id);
+    }
   }, []);
 
   useEffect(() => {
