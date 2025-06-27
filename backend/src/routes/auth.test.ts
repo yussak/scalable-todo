@@ -176,21 +176,27 @@ describe("Auth Routes", () => {
     });
   });
 
-  //   it('存在しないユーザーではログインできない', async () => {
-  //     vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
+  it("存在しないユーザーではログインできない", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
-  //     const response = await request(app)
-  //       .post('/api/auth/login')
-  //       .send({
-  //         email: 'nonexistent@example.com',
-  //         password: 'password123',
-  //       });
+    const response = await request(app).post("/api/auth/login").send({
+      email: "nonexistent@example.com",
+      password: "password123",
+    });
 
-  //     expect(response.status).toBe(401);
-  //     expect(response.body).toEqual({
-  //       error: 'Invalid credentials',
-  //     });
-  //   });
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "Invalid credentials",
+    });
+
+    // prisma.user.findUniqueが呼ばれていることを確認
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { email: "nonexistent@example.com" },
+    });
+
+    // bcrypt.compareは呼ばれないことを確認（ユーザーが存在しないため）
+    expect(bcrypt.compare).not.toHaveBeenCalled();
+  });
 
   //   it('間違ったパスワードではログインできない', async () => {
   //     const mockUser = {
