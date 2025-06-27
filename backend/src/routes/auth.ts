@@ -3,35 +3,39 @@ import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.js";
 
-export const authRouter = Router();
+const authRouter = Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 const SALT_ROUNDS = 10;
 
 // 認証ミドルウェア
-export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({ error: 'Access token required' });
+      return res.status(401).json({ error: "Access token required" });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, email: true }
+      select: { id: true, email: true },
     });
 
     if (!user) {
-      return res.status(403).json({ error: 'Invalid or expired token' });
+      return res.status(403).json({ error: "Invalid or expired token" });
     }
 
     (req as any).user = user;
     next();
   } catch (error) {
-    res.status(403).json({ error: 'Invalid or expired token' });
+    res.status(403).json({ error: "Invalid or expired token" });
   }
 };
 
@@ -52,7 +56,9 @@ authRouter.post("/register", async (req, res) => {
 
     // パスワード長のバリデーション
     if (!password || password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
     }
 
     // 既存ユーザーのチェック
@@ -127,3 +133,5 @@ authRouter.post("/login", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+export default authRouter;

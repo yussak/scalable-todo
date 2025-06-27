@@ -3,7 +3,7 @@ import request from "supertest";
 import express from "express";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { authRouter, authenticateToken } from "./auth";
+import authRoutes, { authenticateToken } from "./auth";
 import prisma from "../prisma";
 
 // Prismaのモック
@@ -30,7 +30,7 @@ describe("Auth Routes", () => {
   beforeEach(() => {
     app = express();
     app.use(express.json());
-    app.use("/api/auth", authRouter);
+    app.use("/api/auth", authRoutes);
     vi.clearAllMocks();
   });
 
@@ -68,68 +68,60 @@ describe("Auth Routes", () => {
       });
     });
 
-    it('既存のメールアドレスでは登録できない', async () => {
+    it("既存のメールアドレスでは登録できない", async () => {
       const existingUser = {
         id: 1,
-        email: 'existing@example.com',
-        password: 'hashedPassword',
+        email: "existing@example.com",
+        password: "hashedPassword",
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(existingUser);
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send({
-          email: 'existing@example.com',
-          password: 'password123',
-        });
+      const response = await request(app).post("/api/auth/register").send({
+        email: "existing@example.com",
+        password: "password123",
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
-        error: 'User already exists',
+        error: "User already exists",
       });
     });
 
-    it('メールアドレスが不正な形式の場合はエラーを返す', async () => {
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send({
-          email: 'invalid-email',
-          password: 'password123',
-        });
+    it("メールアドレスが不正な形式の場合はエラーを返す", async () => {
+      const response = await request(app).post("/api/auth/register").send({
+        email: "invalid-email",
+        password: "password123",
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
-        error: 'Invalid email format',
+        error: "Invalid email format",
       });
     });
 
-    it('パスワードが短すぎる場合はエラーを返す', async () => {
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send({
-          email: 'test@example.com',
-          password: '123',
-        });
+    it("パスワードが短すぎる場合はエラーを返す", async () => {
+      const response = await request(app).post("/api/auth/register").send({
+        email: "test@example.com",
+        password: "123",
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
-        error: 'Password must be at least 6 characters',
+        error: "Password must be at least 6 characters",
       });
     });
 
-    it('必須フィールドが欠けている場合はエラーを返す', async () => {
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send({
-          email: 'test@example.com',
-        });
+    it("必須フィールドが欠けている場合はエラーを返す", async () => {
+      const response = await request(app).post("/api/auth/register").send({
+        email: "test@example.com",
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
-        error: 'Email and password are required',
+        error: "Email and password are required",
       });
     });
   });
@@ -214,73 +206,70 @@ describe("Auth Routes", () => {
     });
   });
 
-  it('必須フィールドが欠けている場合はエラーを返す', async () => {
-    const response = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'test@example.com',
-      });
+  it("必須フィールドが欠けている場合はエラーを返す", async () => {
+    const response = await request(app).post("/api/auth/login").send({
+      email: "test@example.com",
+    });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
-      error: 'Email and password are required',
+      error: "Email and password are required",
     });
   });
   // });
 
-  describe('認証ミドルウェア', () => {
-    it('有効なトークンでリクエストが通る', async () => {
+  describe("認証ミドルウェア", () => {
+    it("有効なトークンでリクエストが通る", async () => {
       const mockUser = {
         id: 1,
-        email: 'test@example.com',
+        email: "test@example.com",
       };
 
       vi.mocked(jwt.verify).mockReturnValue({ userId: 1 });
       vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
 
       // 認証が必要なエンドポイントのテスト
-      app.get('/api/auth/me', authenticateToken, async (req, res) => {
+      app.get("/api/auth/me", authenticateToken, async (req, res) => {
         res.json({ user: req.user });
       });
 
       const response = await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', 'Bearer validToken');
+        .get("/api/auth/me")
+        .set("Authorization", "Bearer validToken");
 
       expect(response.status).toBe(200);
       expect(response.body.user).toEqual(mockUser);
     });
 
-    it('トークンがない場合は401エラー', async () => {
-      app.get('/api/auth/me', authenticateToken, async (req, res) => {
+    it("トークンがない場合は401エラー", async () => {
+      app.get("/api/auth/me", authenticateToken, async (req, res) => {
         res.json({ user: req.user });
       });
 
-      const response = await request(app)
-        .get('/api/auth/me');
+      const response = await request(app).get("/api/auth/me");
 
       expect(response.status).toBe(401);
       expect(response.body).toEqual({
-        error: 'Access token required',
+        error: "Access token required",
       });
     });
 
-    it('無効なトークンの場合は403エラー', async () => {
+    it("無効なトークンの場合は403エラー", async () => {
       vi.mocked(jwt.verify).mockImplementation(() => {
-        throw new Error('Invalid token');
+        throw new Error("Invalid token");
       });
 
-      app.get('/api/auth/me', authenticateToken, async (req, res) => {
+      app.get("/api/auth/me", authenticateToken, async (req, res) => {
         res.json({ user: req.user });
       });
 
       const response = await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', 'Bearer invalidToken');
+        .get("/api/auth/me")
+        .set("Authorization", "Bearer invalidToken");
 
       expect(response.status).toBe(403);
       expect(response.body).toEqual({
-        error: 'Invalid or expired token',
+        error: "Invalid or expired token",
       });
     });
   });
