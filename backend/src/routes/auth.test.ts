@@ -16,12 +16,6 @@ vi.mock("../prisma", () => ({
   },
 }));
 
-// bcryptのモック
-vi.mock("bcryptjs", () => ({
-  hash: vi.fn(),
-  compare: vi.fn(),
-}));
-
 // jwtのモック
 vi.mock("jsonwebtoken", () => ({
   default: {
@@ -54,7 +48,6 @@ describe("Auth Routes", () => {
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-      vi.mocked(bcrypt.hash).mockResolvedValue("hashedPassword" as any);
       vi.mocked(prisma.user.create).mockResolvedValue(mockUser);
       vi.mocked(jwt.sign).mockReturnValue("mockToken" as any);
 
@@ -72,7 +65,6 @@ describe("Auth Routes", () => {
         },
         token: "mockToken",
       });
-      expect(bcrypt.hash).toHaveBeenCalledWith("password123", 10);
     });
 
     // it('既存のメールアドレスでは登録できない', async () => {
@@ -143,21 +135,24 @@ describe("Auth Routes", () => {
 
   describe("POST /api/auth/login", () => {
     it("正しい認証情報でログインできる", async () => {
+      // 実際にパスワードをハッシュ化
+      const plainPassword = "password123";
+      const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
       const mockUser = {
         id: 1,
         email: "test@example.com",
-        password: "hashedPassword",
+        password: hashedPassword,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
-      vi.mocked(bcrypt.compare).mockResolvedValue(true);
       vi.mocked(jwt.sign).mockReturnValue("mockToken" as any);
 
       const response = await request(app).post("/api/auth/login").send({
         email: "test@example.com",
-        password: "password123",
+        password: "password123", // 正しいパスワード
       });
 
       expect(response.status).toBe(200);
@@ -169,10 +164,6 @@ describe("Auth Routes", () => {
         },
         token: "mockToken",
       });
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        "password123",
-        "hashedPassword"
-      );
     });
   });
 
@@ -193,35 +184,34 @@ describe("Auth Routes", () => {
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
       where: { email: "nonexistent@example.com" },
     });
-
-    // bcrypt.compareは呼ばれないことを確認（ユーザーが存在しないため）
-    expect(bcrypt.compare).not.toHaveBeenCalled();
   });
 
-  //   it('間違ったパスワードではログインできない', async () => {
-  //     const mockUser = {
-  //       id: 1,
-  //       email: 'test@example.com',
-  //       password: 'hashedPassword',
-  //       createdAt: new Date(),
-  //       updatedAt: new Date(),
-  //     };
+  it("間違ったパスワードではログインできない", async () => {
+    // 実際にパスワードをハッシュ化
+    const plainPassword = "password123";
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-  //     vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
-  //     vi.mocked(bcrypt.compare).mockResolvedValue(false);
+    const mockUser = {
+      id: 1,
+      email: "test@example.com",
+      password: hashedPassword, // 実際にハッシュ化されたパスワード
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-  //     const response = await request(app)
-  //       .post('/api/auth/login')
-  //       .send({
-  //         email: 'test@example.com',
-  //         password: 'wrongpassword',
-  //       });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
 
-  //     expect(response.status).toBe(401);
-  //     expect(response.body).toEqual({
-  //       error: 'Invalid credentials',
-  //     });
-  //   });
+    const response = await request(app).post("/api/auth/login").send({
+      email: "test@example.com",
+      // password: "password123", // 正しいパスワード
+      password: "wrongpassword", // 間違ったパスワード
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "Invalid credentials",
+    });
+  });
 
   //   it('必須フィールドが欠けている場合はエラーを返す', async () => {
   //     const response = await request(app)
