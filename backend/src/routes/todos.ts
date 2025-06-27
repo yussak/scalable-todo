@@ -1,26 +1,26 @@
-import { Router, Request, Response } from 'express';
-import prisma from '../prisma.js';
+import { Router, Request, Response } from "express";
+import prisma from "../prisma.js";
 
 const router = Router();
 
-router.get('/', async (req: Request, res: Response): Promise<void> => {
+router.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const todos = await prisma.todo.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
     res.json(todos);
   } catch (error) {
-    console.error('Error fetching todos:', error);
-    res.status(500).json({ error: 'Failed to fetch todos' });
+    console.error("Error fetching todos:", error);
+    res.status(500).json({ error: "Failed to fetch todos" });
   }
 });
 
-router.post('/', async (req: Request, res: Response): Promise<void> => {
+router.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description } = req.body;
-    
+
     if (!title) {
-      res.status(400).json({ error: 'Title is required' });
+      res.status(400).json({ error: "Title is required" });
       return;
     }
 
@@ -28,29 +28,29 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       data: {
         title,
         description: description || null,
-      }
+      },
     });
-    
+
     res.status(201).json(todo);
   } catch (error) {
-    console.error('Error creating todo:', error);
-    res.status(500).json({ error: 'Failed to create todo' });
+    console.error("Error creating todo:", error);
+    res.status(500).json({ error: "Failed to create todo" });
   }
 });
 
-router.put('/:id', async (req: Request, res: Response): Promise<void> => {
+router.put("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { title, description, completed } = req.body;
     const todoId = parseInt(id, 10);
 
     if (isNaN(todoId)) {
-      res.status(400).json({ error: 'Invalid todo ID' });
+      res.status(400).json({ error: "Invalid todo ID" });
       return;
     }
 
-    if (!title || title.trim() === '') {
-      res.status(400).json({ error: 'Title is required' });
+    if (!title || title.trim() === "") {
+      res.status(400).json({ error: "Title is required" });
       return;
     }
 
@@ -60,45 +60,45 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
         title: title.trim(),
         description: description !== undefined ? description : undefined,
         completed: completed !== undefined ? completed : undefined,
-      }
+      },
     });
 
     res.json(updatedTodo);
   } catch (error: any) {
-    if (error.code === 'P2025') {
-      res.status(404).json({ error: 'Todo not found' });
+    if (error.code === "P2025") {
+      res.status(404).json({ error: "Todo not found" });
     } else {
-      console.error('Error updating todo:', error);
-      res.status(500).json({ error: 'Failed to update todo' });
+      console.error("Error updating todo:", error);
+      res.status(500).json({ error: "Failed to update todo" });
     }
   }
 });
 
-router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const todoId = parseInt(id, 10);
 
     if (isNaN(todoId)) {
-      res.status(400).json({ error: 'Invalid todo ID' });
+      res.status(400).json({ error: "Invalid todo ID" });
       return;
     }
 
     await prisma.todo.delete({
-      where: { id: todoId }
+      where: { id: todoId },
     });
 
     const remainingTodos = await prisma.todo.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
 
     res.json(remainingTodos);
   } catch (error: any) {
-    if (error.code === 'P2025') {
-      res.status(404).json({ error: 'Todo not found' });
+    if (error.code === "P2025") {
+      res.status(404).json({ error: "Todo not found" });
     } else {
-      console.error('Error deleting todo:', error);
-      res.status(500).json({ error: 'Failed to delete todo' });
+      console.error("Error deleting todo:", error);
+      res.status(500).json({ error: "Failed to delete todo" });
     }
   }
 });
