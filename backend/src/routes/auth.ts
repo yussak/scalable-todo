@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.js";
@@ -7,6 +7,33 @@ export const authRouter = Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 const SALT_ROUNDS = 10;
+
+// 認証ミドルウェア
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ error: 'Access token required' });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, email: true }
+    });
+
+    if (!user) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+
+    (req as any).user = user;
+    next();
+  } catch (error) {
+    res.status(403).json({ error: 'Invalid or expired token' });
+  }
+};
 
 authRouter.post("/register", async (req, res) => {
   try {

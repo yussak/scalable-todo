@@ -3,7 +3,7 @@ import request from "supertest";
 import express from "express";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { authRouter } from "./auth";
+import { authRouter, authenticateToken } from "./auth";
 import prisma from "../prisma";
 
 // Prismaのモック
@@ -20,6 +20,7 @@ vi.mock("../prisma", () => ({
 vi.mock("jsonwebtoken", () => ({
   default: {
     sign: vi.fn(),
+    verify: vi.fn(),
   },
 }));
 
@@ -227,65 +228,60 @@ describe("Auth Routes", () => {
   });
   // });
 
-  // describe('認証ミドルウェア', () => {
-  //   it('有効なトークンでリクエストが通る', async () => {
-  //     const mockUser = {
-  //       id: 1,
-  //       email: 'test@example.com',
-  //     };
+  describe('認証ミドルウェア', () => {
+    it('有効なトークンでリクエストが通る', async () => {
+      const mockUser = {
+        id: 1,
+        email: 'test@example.com',
+      };
 
-  //     vi.mocked(jwt.verify).mockReturnValue({ userId: 1 });
-  //     vi.mocked(prisma.user.findUnique).mockResolvedValue({
-  //       ...mockUser,
-  //       password: 'hashedPassword',
-  //       createdAt: new Date(),
-  //       updatedAt: new Date(),
-  //     });
+      vi.mocked(jwt.verify).mockReturnValue({ userId: 1 });
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
 
-  //     // 認証が必要なエンドポイントのテスト
-  //     app.get('/api/auth/me', authenticateToken, async (req, res) => {
-  //       res.json({ user: req.user });
-  //     });
+      // 認証が必要なエンドポイントのテスト
+      app.get('/api/auth/me', authenticateToken, async (req, res) => {
+        res.json({ user: req.user });
+      });
 
-  //     const response = await request(app)
-  //       .get('/api/auth/me')
-  //       .set('Authorization', 'Bearer validToken');
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('Authorization', 'Bearer validToken');
 
-  //     expect(response.status).toBe(200);
-  //     expect(response.body.user).toEqual(mockUser);
-  //   });
+      expect(response.status).toBe(200);
+      expect(response.body.user).toEqual(mockUser);
+    });
 
-  //   it('トークンがない場合は401エラー', async () => {
-  //     app.get('/api/auth/me', authenticateToken, async (req, res) => {
-  //       res.json({ user: req.user });
-  //     });
+    it('トークンがない場合は401エラー', async () => {
+      app.get('/api/auth/me', authenticateToken, async (req, res) => {
+        res.json({ user: req.user });
+      });
 
-  //     const response = await request(app)
-  //       .get('/api/auth/me');
+      const response = await request(app)
+        .get('/api/auth/me');
 
-  //     expect(response.status).toBe(401);
-  //     expect(response.body).toEqual({
-  //       error: 'Access token required',
-  //     });
-  //   });
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({
+        error: 'Access token required',
+      });
+    });
 
-  //   it('無効なトークンの場合は403エラー', async () => {
-  //     vi.mocked(jwt.verify).mockImplementation(() => {
-  //       throw new Error('Invalid token');
-  //     });
+    it('無効なトークンの場合は403エラー', async () => {
+      vi.mocked(jwt.verify).mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
 
-  //     app.get('/api/auth/me', authenticateToken, async (req, res) => {
-  //       res.json({ user: req.user });
-  //     });
+      app.get('/api/auth/me', authenticateToken, async (req, res) => {
+        res.json({ user: req.user });
+      });
 
-  //     const response = await request(app)
-  //       .get('/api/auth/me')
-  //       .set('Authorization', 'Bearer invalidToken');
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('Authorization', 'Bearer invalidToken');
 
-  //     expect(response.status).toBe(403);
-  //     expect(response.body).toEqual({
-  //       error: 'Invalid or expired token',
-  //     });
-  //   });
-  // });
+      expect(response.status).toBe(403);
+      expect(response.body).toEqual({
+        error: 'Invalid or expired token',
+      });
+    });
+  });
 });
