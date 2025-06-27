@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import request from "supertest";
 import express from "express";
 import * as bcrypt from "bcryptjs";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { authRouter } from "./auth";
 import prisma from "../prisma";
 
@@ -24,7 +24,9 @@ vi.mock("bcryptjs", () => ({
 
 // jwtのモック
 vi.mock("jsonwebtoken", () => ({
-  sign: vi.fn(),
+  default: {
+    sign: vi.fn(),
+  },
 }));
 
 describe("Auth Routes", () => {
