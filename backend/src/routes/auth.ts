@@ -12,6 +12,17 @@ authRouter.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // メール形式のバリデーション
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // パスワード長のバリデーション
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
     // 既存ユーザーのチェック
     const existingUser = await prisma.user.findUnique({
       where: { email },
