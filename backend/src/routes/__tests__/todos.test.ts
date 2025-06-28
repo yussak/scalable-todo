@@ -8,21 +8,23 @@ const app = express();
 app.use(express.json());
 app.use("/api/todos", todoRoutes);
 
-describe("POST /api/todos", () => {
-  let testUser: any;
+// 全体で共通のテストユーザー
+let testUser: any;
 
-  // 各テスト前にデータクリアとテストユーザー作成
-  beforeEach(async () => {
-    await prisma.todo.deleteMany();
-    await prisma.user.deleteMany();
-    // テストユーザーを作成
-    testUser = await prisma.user.create({
-      data: {
-        email: "testuser@example.test",
-        password: "hashedPassword123",
-      },
-    });
+beforeEach(async () => {
+  await prisma.todo.deleteMany();
+  await prisma.user.deleteMany();
+
+  const timestamp = Date.now();
+  testUser = await prisma.user.create({
+    data: {
+      email: `testuser-${timestamp}@example.test`,
+      password: "hashedPassword123",
+    },
   });
+});
+
+describe("POST /api/todos", () => {
   it("should create a new todo successfully", async () => {
     const newTodo = {
       title: "Test Todo",
@@ -44,7 +46,7 @@ describe("POST /api/todos", () => {
       updatedAt: expect.any(String),
       user: expect.objectContaining({
         id: testUser.id,
-        email: "testuser@example.test",
+        email: testUser.email,
       }),
     });
 
@@ -62,20 +64,6 @@ describe("POST /api/todos", () => {
 });
 
 describe("GET /api/todos", () => {
-  let testUser: any;
-
-  beforeEach(async () => {
-    await prisma.todo.deleteMany();
-    await prisma.user.deleteMany();
-    // テストユーザーを作成
-    testUser = await prisma.user.create({
-      data: {
-        email: "testuser@example.test",
-        password: "hashedPassword123",
-      },
-    });
-  });
-
   it("should return empty array when no todos exist", async () => {
     const response = await request(app).get(`/api/todos?userId=${testUser.id}`);
 
@@ -129,7 +117,7 @@ describe("GET /api/todos", () => {
         updatedAt: expect.any(String),
         user: expect.objectContaining({
           id: testUser.id,
-          email: "testuser@example.test",
+          email: testUser.email,
         }),
       });
     });
@@ -137,20 +125,6 @@ describe("GET /api/todos", () => {
 });
 
 describe("DELETE /api/todos/:id", () => {
-  let testUser: any;
-
-  beforeEach(async () => {
-    await prisma.todo.deleteMany();
-    await prisma.user.deleteMany();
-    // テストユーザーを作成
-    testUser = await prisma.user.create({
-      data: {
-        email: "testuser@example.test",
-        password: "hashedPassword123",
-      },
-    });
-  });
-
   it("should return 404 when todo not found", async () => {
     const response = await request(app)
       .delete("/api/todos/999")
@@ -197,20 +171,6 @@ describe("DELETE /api/todos/:id", () => {
 });
 
 describe("PUT /api/todos/:id", () => {
-  let testUser: any;
-
-  beforeEach(async () => {
-    await prisma.todo.deleteMany();
-    await prisma.user.deleteMany();
-    // テストユーザーを作成
-    testUser = await prisma.user.create({
-      data: {
-        email: "testuser@example.test",
-        password: "hashedPassword123",
-      },
-    });
-  });
-
   it("should return 404 when todo not found", async () => {
     const updateData = {
       title: "Updated Todo",
