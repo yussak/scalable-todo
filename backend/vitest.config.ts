@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    env: loadEnv("test", process.cwd(), ""),
+    env: {
+      NODE_ENV: "test",
+      ...loadEnv("test", process.cwd(), ""),
+    },
   },
 });

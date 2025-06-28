@@ -1,42 +1,22 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import express from "express";
-import { PrismaClient } from "@prisma/client";
-import dotenv from "dotenv";
-
-// テスト用環境変数を読み込み
-dotenv.config({ path: ".env.test" });
-
-// テスト用DBに接続
-const testPrisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
-
-// Prismaクライアントをテスト用に置き換え
-vi.mock("../../prisma", () => ({
-  default: testPrisma,
-}));
-
-// モック後にルートをインポート
-const todoRoutes = await import("../todos");
+import prisma from "../../prisma";
+import todoRoutes from "../todos";
 
 const app = express();
 app.use(express.json());
-app.use("/api/todos", todoRoutes.default);
+app.use("/api/todos", todoRoutes);
 
 describe("POST /api/todos", () => {
   let testUser: any;
 
   // 各テスト前にデータクリアとテストユーザー作成
   beforeEach(async () => {
-    await testPrisma.todo.deleteMany();
-    await testPrisma.user.deleteMany();
+    await prisma.todo.deleteMany();
+    await prisma.user.deleteMany();
     // テストユーザーを作成
-    testUser = await testPrisma.user.create({
+    testUser = await prisma.user.create({
       data: {
         email: "testuser@example.test",
         password: "hashedPassword123",
@@ -68,7 +48,7 @@ describe("POST /api/todos", () => {
       }),
     });
 
-    const savedTodo = await testPrisma.todo.findUnique({
+    const savedTodo = await prisma.todo.findUnique({
       where: { id: response.body.id },
     });
 
@@ -85,10 +65,10 @@ describe("GET /api/todos", () => {
   let testUser: any;
 
   beforeEach(async () => {
-    await testPrisma.todo.deleteMany();
-    await testPrisma.user.deleteMany();
+    await prisma.todo.deleteMany();
+    await prisma.user.deleteMany();
     // テストユーザーを作成
-    testUser = await testPrisma.user.create({
+    testUser = await prisma.user.create({
       data: {
         email: "testuser@example.test",
         password: "hashedPassword123",
@@ -126,7 +106,7 @@ describe("GET /api/todos", () => {
       },
     ];
 
-    await testPrisma.todo.createMany({
+    await prisma.todo.createMany({
       data: testTodos,
     });
 
@@ -160,10 +140,10 @@ describe("DELETE /api/todos/:id", () => {
   let testUser: any;
 
   beforeEach(async () => {
-    await testPrisma.todo.deleteMany();
-    await testPrisma.user.deleteMany();
+    await prisma.todo.deleteMany();
+    await prisma.user.deleteMany();
     // テストユーザーを作成
-    testUser = await testPrisma.user.create({
+    testUser = await prisma.user.create({
       data: {
         email: "testuser@example.test",
         password: "hashedPassword123",
@@ -204,7 +184,7 @@ describe("DELETE /api/todos/:id", () => {
     ];
 
     const createdTodos = await Promise.all(
-      testTodos.map((todo) => testPrisma.todo.create({ data: todo }))
+      testTodos.map((todo) => prisma.todo.create({ data: todo }))
     );
 
     const response = await request(app)
@@ -220,10 +200,10 @@ describe("PUT /api/todos/:id", () => {
   let testUser: any;
 
   beforeEach(async () => {
-    await testPrisma.todo.deleteMany();
-    await testPrisma.user.deleteMany();
+    await prisma.todo.deleteMany();
+    await prisma.user.deleteMany();
     // テストユーザーを作成
-    testUser = await testPrisma.user.create({
+    testUser = await prisma.user.create({
       data: {
         email: "testuser@example.test",
         password: "hashedPassword123",
@@ -246,7 +226,7 @@ describe("PUT /api/todos/:id", () => {
   });
 
   it("should return 400 when title is empty", async () => {
-    const createdTodo = await testPrisma.todo.create({
+    const createdTodo = await prisma.todo.create({
       data: {
         title: "Original Todo",
         description: "Original Description",
@@ -266,7 +246,7 @@ describe("PUT /api/todos/:id", () => {
   });
 
   it("should update a todo successfully", async () => {
-    const createdTodo = await testPrisma.todo.create({
+    const createdTodo = await prisma.todo.create({
       data: {
         title: "Original Todo",
         description: "Original Description",
@@ -294,7 +274,7 @@ describe("PUT /api/todos/:id", () => {
       completed: true,
     });
 
-    const savedTodo = await testPrisma.todo.findUnique({
+    const savedTodo = await prisma.todo.findUnique({
       where: { id: createdTodo.id },
     });
 
