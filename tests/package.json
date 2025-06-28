@@ -1,0 +1,21 @@
+{
+  "name": "scalable-todo-app-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for scalable todo app",
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "^22.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "happy-dom": "^15.0.0",
+    "playwright": "^1.49.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}
