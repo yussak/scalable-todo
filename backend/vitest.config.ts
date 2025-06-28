@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    setupFiles: "./tests/setup.ts",
     env: {
       NODE_ENV: "test",
       ...loadEnv("test", process.cwd(), ""),
