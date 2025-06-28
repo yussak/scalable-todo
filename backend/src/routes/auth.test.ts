@@ -6,15 +6,7 @@ import jwt from "jsonwebtoken";
 import authRoutes, { authenticateToken } from "./auth";
 import prisma from "../prisma";
 
-// Prismaのモック
-vi.mock("../prisma", () => ({
-  default: {
-    user: {
-      findUnique: vi.fn(),
-      create: vi.fn(),
-    },
-  },
-}));
+// todo：ディレクトリ移動
 
 // jwtのモック
 vi.mock("jsonwebtoken", () => ({
@@ -27,7 +19,9 @@ vi.mock("jsonwebtoken", () => ({
 describe("Auth Routes", () => {
   let app: express.Application;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await prisma.user.deleteMany();
+
     app = express();
     app.use(express.json());
     app.use("/api/auth", authRoutes);
@@ -40,16 +34,6 @@ describe("Auth Routes", () => {
 
   describe("POST /api/auth/register", () => {
     it("新規ユーザーを正常に登録できる", async () => {
-      const mockUser = {
-        id: 1,
-        email: "test@example.com",
-        password: "hashedPassword",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-      vi.mocked(prisma.user.create).mockResolvedValue(mockUser);
       vi.mocked(jwt.sign).mockReturnValue("mockToken" as any);
 
       const response = await request(app).post("/api/auth/register").send({
@@ -61,23 +45,28 @@ describe("Auth Routes", () => {
       expect(response.body).toEqual({
         message: "User registered successfully",
         user: {
-          id: mockUser.id,
-          email: mockUser.email,
+          id: expect.any(Number),
+          email: "test@example.com",
         },
         token: "mockToken",
       });
+
+      // DBに実際に保存されていることを確認
+      const savedUser = await prisma.user.findUnique({
+        where: { email: "test@example.com" },
+      });
+      expect(savedUser).toBeTruthy();
+      expect(savedUser?.email).toBe("test@example.com");
     });
 
     it("既存のメールアドレスでは登録できない", async () => {
-      const existingUser = {
-        id: 1,
-        email: "existing@example.com",
-        password: "hashedPassword",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(existingUser);
+      // 先にユーザーを作成
+      await prisma.user.create({
+        data: {
+          email: "existing@example.com",
+          password: "hashedPassword",
+        },
+      });
 
       const response = await request(app).post("/api/auth/register").send({
         email: "existing@example.com",
@@ -132,15 +121,14 @@ describe("Auth Routes", () => {
       const plainPassword = "password123";
       const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-      const mockUser = {
-        id: 1,
-        email: "test@example.com",
-        password: hashedPassword,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      // テストユーザーを作成
+      const testUser = await prisma.user.create({
+        data: {
+          email: "test@example.com",
+          password: hashedPassword,
+        },
+      });
 
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
       vi.mocked(jwt.sign).mockReturnValue("mockToken" as any);
 
       const response = await request(app).post("/api/auth/login").send({
@@ -152,16 +140,14 @@ describe("Auth Routes", () => {
       expect(response.body).toEqual({
         message: "Login successful",
         user: {
-          id: mockUser.id,
-          email: mockUser.email,
+          id: testUser.id,
+          email: testUser.email,
         },
         token: "mockToken",
       });
     });
 
     it("存在しないユーザーではログインできない", async () => {
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-
       const response = await request(app).post("/api/auth/login").send({
         email: "nonexistent@example.com",
         password: "password123",
@@ -171,11 +157,6 @@ describe("Auth Routes", () => {
       expect(response.body).toEqual({
         error: "Invalid credentials",
       });
-
-      // prisma.user.findUniqueが呼ばれていることを確認
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: "nonexistent@example.com" },
-      });
     });
 
     it("間違ったパスワードではログインできない", async () => {
@@ -183,19 +164,16 @@ describe("Auth Routes", () => {
       const plainPassword = "password123";
       const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-      const mockUser = {
-        id: 1,
-        email: "test@example.com",
-        password: hashedPassword, // 実際にハッシュ化されたパスワード
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
+      // テストユーザーを作成
+      await prisma.user.create({
+        data: {
+          email: "test@example.com",
+          password: hashedPassword,
+        },
+      });
 
       const response = await request(app).post("/api/auth/login").send({
         email: "test@example.com",
-        // password: "password123", // 正しいパスワード
         password: "wrongpassword", // 間違ったパスワード
       });
 
@@ -219,13 +197,15 @@ describe("Auth Routes", () => {
 
   describe("認証ミドルウェア", () => {
     it("有効なトークンでリクエストが通る", async () => {
-      const mockUser = {
-        id: 1,
-        email: "test@example.com",
-      };
+      // テストユーザーを作成
+      const testUser = await prisma.user.create({
+        data: {
+          email: "test@example.com",
+          password: "hashedPassword",
+        },
+      });
 
-      vi.mocked(jwt.verify).mockReturnValue({ userId: 1 });
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
+      vi.mocked(jwt.verify).mockReturnValue({ userId: testUser.id });
 
       // 認証が必要なエンドポイントのテスト
       app.get("/api/auth/me", authenticateToken, async (req, res) => {
@@ -237,7 +217,10 @@ describe("Auth Routes", () => {
         .set("Authorization", "Bearer validToken");
 
       expect(response.status).toBe(200);
-      expect(response.body.user).toEqual(mockUser);
+      expect(response.body.user).toEqual({
+        id: testUser.id,
+        email: testUser.email,
+      });
     });
 
     it("トークンがない場合は401エラー", async () => {
