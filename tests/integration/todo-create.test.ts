@@ -1,40 +1,62 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { createTestUser, loginTestUser, type AuthInfo } from "../helpers/auth";
+import { authenticatedFetch } from "../helpers/api";
 
 /**
  * TODO作成機能の統合テスト
  * フロントエンド・バックエンド間の連携を検証
- * 
+ *
  * テスト戦略:
  * - 実際のバックエンドAPIを使用
- * - データベースへの保存を確認
- * - エンドツーエンドのフローを検証
+ * - 認証を含む完全なフローをテスト
+ * - 正常系のみをテスト
  */
 
 describe("TODO作成 統合テスト", () => {
-  let testUserId: number;
-  let testToken: string;
+  let authInfo: AuthInfo;
+  const testEmail = `test-${Date.now()}@example.com`;
+  const testPassword = "password123";
 
   beforeAll(async () => {
-    // テスト環境のセットアップ
+    await createTestUser(testEmail, testPassword);
+    authInfo = await loginTestUser(testEmail, testPassword);
   });
 
   afterAll(async () => {
-    // テストデータのクリーンアップ
-  });
-
-  beforeEach(() => {
-    // 各テストケースの前処理
+    // バックエンドのテストでクリーンアップが自動実行されるため、
+    // 明示的なクリーンアップは不要
   });
 
   describe("正常系", () => {
-    it("新しいTODOを作成できる", async () => {
-      // テストケースは別途実装
-    });
-  });
+    it("認証済みユーザーが新しいTODOを作成できる", async () => {
+      const todoData = {
+        title: "統合テスト用TODO",
+        description: "このTODOは統合テストで作成されました",
+        userId: authInfo.userId,
+      };
 
-  describe("異常系", () => {
-    it("必須項目が不足している場合はエラーになる", async () => {
-      // テストケースは別途実装
+      const response = await authenticatedFetch("/api/todos", authInfo.token, {
+        method: "POST",
+        body: JSON.stringify(todoData),
+      });
+
+      expect(response.status).toBe(201);
+
+      const createdTodo = await response.json();
+
+      expect(createdTodo).toMatchObject({
+        id: expect.any(Number),
+        title: todoData.title,
+        description: todoData.description,
+        completed: false,
+        userId: authInfo.userId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        user: expect.objectContaining({
+          id: authInfo.userId,
+          email: testEmail,
+        }),
+      });
     });
   });
 });
