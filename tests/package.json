@@ -5,7 +5,9 @@
   "scripts": {
     "test": "vitest",
     "test:run": "vitest run",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:ui": "vitest --coverage --ui"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.0.0",

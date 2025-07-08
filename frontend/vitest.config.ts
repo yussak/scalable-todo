@@ -6,6 +6,29 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "jsdom",
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      reportsDirectory: "./coverage",
+      exclude: [
+        "node_modules/**",
+        ".next/**",
+        "out/**",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "src/app/layout.tsx",
+        "src/app/globals.css",
+        "src/test/**",
+      ],
+      include: ["src/**/*.{ts,tsx}"],
+      all: true,
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 70,
+        statements: 80,
+      },
+    },
   },
   resolve: {
     alias: {
