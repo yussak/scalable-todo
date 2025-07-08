@@ -1,5 +1,7 @@
 import { defineConfig } from "vitest/config";
-import { loadEnv } from "vite";
+import { config } from "dotenv";
+
+config({ path: ".env.test" });
 
 export default defineConfig({
   test: {
@@ -8,7 +10,6 @@ export default defineConfig({
     setupFiles: "./tests/setup.ts",
     env: {
       NODE_ENV: "test",
-      ...loadEnv("test", process.cwd(), ""),
     },
     coverage: {
       provider: "v8",

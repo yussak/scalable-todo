@@ -1,9 +1,11 @@
 import { beforeAll } from "vitest";
+import { config } from "dotenv";
 
 beforeAll(async () => {
   // テスト実行前の安全性チェック
   // rootのtestsでは一旦はDB接続のテストはしないのでbackendのみでチェックしている
 
+  config({ path: ".env.test", override: true });
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
     throw new Error("DATABASE_URLが設定されていません");
