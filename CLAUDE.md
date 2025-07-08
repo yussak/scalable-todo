@@ -137,3 +137,5 @@ Backend connects to PostgreSQL using:
 5. Both services have TypeScript compilation checks
 
 Please proceed with the TDD cycle in the style of t_wada.
+
+テスト時には開発用 DB を使わずテスト用 DB を使う
