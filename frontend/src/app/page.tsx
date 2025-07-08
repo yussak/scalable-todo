@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 interface Todo {
   id: number;
@@ -26,12 +27,15 @@ export default function Home() {
   const [editDescription, setEditDescription] = useState("");
   const [editCompleted, setEditCompleted] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const router = useRouter();
 
-  const fetchTodos = async () => {
+  const fetchTodos = useCallback(async () => {
     if (!currentUserId) return;
-    
+
     try {
-      const response = await fetch(`http://localhost:3011/api/todos?userId=${currentUserId}`);
+      const response = await fetch(
+        `http://localhost:3011/api/todos?userId=${currentUserId}`
+      );
       if (response.ok) {
         const data = await response.json();
         setTodos(data);
@@ -39,7 +43,7 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to fetch todos:", error);
     }
-  };
+  }, [currentUserId]);
 
   const createTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +77,7 @@ export default function Home() {
 
   const deleteTodo = async (id: number) => {
     if (!currentUserId) return;
-    
+
     try {
       const response = await fetch(`http://localhost:3011/api/todos/${id}`, {
         method: "DELETE",
@@ -135,9 +139,16 @@ export default function Home() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setCurrentUserId(null);
+    router.push("/login");
+  };
+
   useEffect(() => {
     // localStorageからユーザー情報を取得
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem("user");
     if (savedUser) {
       const user = JSON.parse(savedUser);
       setCurrentUserId(user.id);
@@ -148,7 +159,7 @@ export default function Home() {
     if (currentUserId) {
       fetchTodos();
     }
-  }, [currentUserId]);
+  }, [currentUserId, fetchTodos]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -167,12 +178,21 @@ export default function Home() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
           TODO アプリ
         </h1>
-        
+
         {currentUserId && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-blue-800 text-sm">
-              ユーザーID: {currentUserId} でログイン中
-            </p>
+            <div className="flex justify-between items-center">
+              <p className="text-blue-800 text-sm">
+                ユーザーID: {currentUserId} でログイン中
+              </p>
+              <button
+                onClick={handleLogout}
+                data-testid="logout-button"
+                className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                ログアウト
+              </button>
+            </div>
           </div>
         )}
 
