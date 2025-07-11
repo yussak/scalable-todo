@@ -34,7 +34,7 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/todos?userId=${user.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/todos?userId=${user.id}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -89,7 +89,7 @@ export default function Home() {
           body: JSON.stringify({
             userId: user.id,
           }),
-        },
+        }
       );
 
       if (response.ok) {
@@ -132,7 +132,7 @@ export default function Home() {
             completed: editCompleted,
             userId: user.id,
           }),
-        },
+        }
       );
 
       if (response.ok) {
