@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useAuth } from "./contexts/AuthContext";
 
 interface Todo {
   id: number;
@@ -26,15 +26,14 @@ export default function Home() {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editCompleted, setEditCompleted] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const router = useRouter();
+  const { user } = useAuth();
 
   const fetchTodos = useCallback(async () => {
-    if (!currentUserId) return;
+    if (!user?.id) return;
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/todos?userId=${currentUserId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/todos?userId=${user.id}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -43,11 +42,11 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to fetch todos:", error);
     }
-  }, [currentUserId]);
+  }, [user?.id]);
 
   const createTodo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !currentUserId) return;
+    if (!title.trim() || !user?.id) return;
 
     setLoading(true);
     try {
@@ -59,7 +58,7 @@ export default function Home() {
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim() || null,
-          userId: currentUserId,
+          userId: user.id,
         }),
       });
 
@@ -76,7 +75,7 @@ export default function Home() {
   };
 
   const deleteTodo = async (id: number) => {
-    if (!currentUserId) return;
+    if (!user?.id) return;
 
     try {
       const response = await fetch(
@@ -87,7 +86,7 @@ export default function Home() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: currentUserId,
+            userId: user.id,
           }),
         }
       );
@@ -116,7 +115,7 @@ export default function Home() {
   };
 
   const updateTodo = async (id: number) => {
-    if (!editTitle.trim() || !currentUserId) return;
+    if (!editTitle.trim() || !user?.id) return;
 
     try {
       const response = await fetch(
@@ -130,7 +129,7 @@ export default function Home() {
             title: editTitle.trim(),
             description: editDescription.trim() || null,
             completed: editCompleted,
-            userId: currentUserId,
+            userId: user.id,
           }),
         }
       );
@@ -145,27 +144,13 @@ export default function Home() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setCurrentUserId(null);
-    router.push("/login");
-  };
+
 
   useEffect(() => {
-    // localStorageからユーザー情報を取得
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setCurrentUserId(user.id);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (currentUserId) {
+    if (user?.id) {
       fetchTodos();
     }
-  }, [currentUserId, fetchTodos]);
+  }, [user?.id, fetchTodos]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -181,26 +166,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-          TODO アプリ
-        </h1>
-
-        {currentUserId && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <div className="flex justify-between items-center">
-              <p className="text-blue-800 text-sm">
-                ユーザーID: {currentUserId} でログイン中
-              </p>
-              <button
-                onClick={handleLogout}
-                data-testid="logout-button"
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-              >
-                ログアウト
-              </button>
-            </div>
-          </div>
-        )}
 
         <form
           onSubmit={createTodo}
