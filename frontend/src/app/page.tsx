@@ -34,7 +34,7 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        `http://localhost:3011/api/todos?userId=${currentUserId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/todos?userId=${currentUserId}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -51,7 +51,7 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3011/api/todos", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/todos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -79,15 +79,18 @@ export default function Home() {
     if (!currentUserId) return;
 
     try {
-      const response = await fetch(`http://localhost:3011/api/todos/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: currentUserId,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: currentUserId,
+          }),
+        }
+      );
 
       if (response.ok) {
         const updatedTodos = await response.json();
@@ -116,18 +119,21 @@ export default function Home() {
     if (!editTitle.trim() || !currentUserId) return;
 
     try {
-      const response = await fetch(`http://localhost:3011/api/todos/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: editTitle.trim(),
-          description: editDescription.trim() || null,
-          completed: editCompleted,
-          userId: currentUserId,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: editTitle.trim(),
+            description: editDescription.trim() || null,
+            completed: editCompleted,
+            userId: currentUserId,
+          }),
+        }
+      );
 
       if (response.ok) {
         const updatedTodo = await response.json();
