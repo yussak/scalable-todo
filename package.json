@@ -1,0 +1,46 @@
+{
+  "name": "scalable-todo-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A scalable TODO application",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "tests"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "lint": "yarn workspaces foreach -A run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "dev": "docker compose up",
+    "build": "yarn workspaces foreach -A run build",
+    "test": "yarn workspaces foreach -A run test",
+    "test:run": "yarn workspaces foreach -A run test:run"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.6.2"
+  },
+  "lint-staged": {
+    "frontend/**/*.{js,jsx,ts,tsx,json,css,md}": [
+      "prettier --write",
+      "cd frontend && yarn lint --fix"
+    ],
+    "backend/**/*.{js,ts,json,md}": [
+      "prettier --write",
+      "cd backend && yarn lint --fix"
+    ],
+    "tests/**/*.{js,ts,json,md}": [
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "yarn": ">=1.22.0"
+  }
+}
