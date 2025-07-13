@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import TodoForm from "./components/TodoForm";
+import api from "@/lib/api";
 
 interface Todo {
   id: number;
@@ -33,9 +34,7 @@ export default function Home() {
     if (!user?.id) return;
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/todos?userId=${user.id}`
-      );
+      const response = await api.get(`/todos?userId=${user.id}`);
       if (response.ok) {
         const data = await response.json();
         setTodos(data);
@@ -51,16 +50,10 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/todos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim() || null,
-          userId: user.id,
-        }),
+      const response = await api.post("/todos", {
+        title: title.trim(),
+        description: description.trim() || null,
+        userId: user.id,
       });
 
       if (response.ok) {
@@ -79,18 +72,9 @@ export default function Home() {
     if (!user?.id) return;
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: user.id,
-          }),
-        }
-      );
+      const response = await api.delete(`/todos/${id}`, {
+        userId: user.id,
+      });
 
       if (response.ok) {
         const updatedTodos = await response.json();
@@ -119,21 +103,12 @@ export default function Home() {
     if (!editTitle.trim() || !user?.id) return;
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            title: editTitle.trim(),
-            description: editDescription.trim() || null,
-            completed: editCompleted,
-            userId: user.id,
-          }),
-        }
-      );
+      const response = await api.put(`/todos/${id}`, {
+        title: editTitle.trim(),
+        description: editDescription.trim() || null,
+        completed: editCompleted,
+        userId: user.id,
+      });
 
       if (response.ok) {
         const updatedTodo = await response.json();
