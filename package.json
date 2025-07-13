@@ -3,20 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "description": "A scalable TODO application",
-  "workspaces": [
-    "frontend",
-    "backend",
-    "tests"
-  ],
   "scripts": {
     "prepare": "husky",
-    "lint": "yarn workspaces foreach -A run lint",
+    "lint": "cd frontend && yarn lint && cd ../backend && yarn lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "dev": "docker compose up",
-    "build": "yarn workspaces foreach -A run build",
-    "test": "yarn workspaces foreach -A run test",
-    "test:run": "yarn workspaces foreach -A run test:run"
+    "build": "cd frontend && yarn build && cd ../backend && yarn build",
+    "test": "cd frontend && yarn test && cd ../backend && yarn test",
+    "test:run": "cd frontend && yarn test:run && cd ../backend && yarn test:run"
   },
   "devDependencies": {
     "husky": "^9.1.7",
