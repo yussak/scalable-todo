@@ -22,6 +22,10 @@ app.get("/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
+app.get("/healthcheck", (req, res) => {
+  res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
 app.use("/api/todos", todoRoutes);
 app.use("/api/auth", authRoutes);
 

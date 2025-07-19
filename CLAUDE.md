@@ -105,7 +105,7 @@ Base URL: `http://localhost:3011`
 Endpoints:
 
 - `GET /` - API health check
-- `GET /health` - Detailed health check
+- `GET /healthcheck` - Detailed health check
 - `GET /api/todos` - Get all todos
 - `POST /api/todos` - Create a new todo (body: `{title: string, description?: string}`)
 
