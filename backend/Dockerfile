@@ -5,7 +5,6 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install
 
-docker compose 
 FROM base as dev
 COPY . .
 RUN yarn prisma generate
