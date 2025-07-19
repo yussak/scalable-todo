@@ -1,0 +1,59 @@
+[
+  {
+    "name": "backend",
+    "image": "160715709398.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:backend-latest",
+    "essential": true,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-region": "ap-northeast-1",
+        "awslogs-stream-prefix": "backend",
+        "awslogs-group": "/ecs/backend"
+      }
+    },
+    "secrets": [
+      {
+        "name": "DB_USERNAME",
+        "valueFrom": "/db/username"
+      },
+      {
+        "name": "DB_PASSWORD",
+        "valueFrom": "/db/password"
+      },
+      {
+        "name": "DB_DBNAME",
+        "valueFrom": "/db/dbname"
+      },
+      {
+        "name": "DB_HOSTNAME",
+        "valueFrom": "/db/hostname"
+      }
+    ],
+    "portMappings": [
+      {
+        "protocol": "tcp",
+        "containerPort": 5000
+      }
+    ]
+  },
+  {
+    "name": "frontend",
+    "image": "160715709398.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:frontend-latest",
+    "essential": true,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-region": "ap-northeast-1",
+        "awslogs-stream-prefix": "frontend",
+        "awslogs-group": "/ecs/frontend"
+      }
+    },
+    "secrets": [],
+    "portMappings": [
+      {
+        "protocol": "tcp",
+        "containerPort": 3000
+      }
+    ]
+  }
+]
