@@ -1,4 +1,6 @@
-
+provider "aws" {
+  region = "ap-northeast-1"
+}
 
 module "describe_regions_for_ec2" {
   source     = "./iam_role"
@@ -675,7 +677,7 @@ resource "aws_ssm_parameter" "db_hostname" {
 
 resource "aws_ssm_parameter" "db_dbname" {
   name        = "/db/dbname"
-  value       = aws_db_instance.scalable-todo-db.db_name
+  value       = "scalable-todo-db"
   type        = "String"
   description = "DB名"
 }
@@ -712,7 +714,8 @@ resource "aws_db_subnet_group" "app" {
 # DBインスタンス
 resource "aws_db_instance" "scalable-todo-db" {
   identifier = "scalable-todo-db"
-  db_name    = "scalable-todo-db"
+  # An argument named "db_name" is not expected here. が出るのでコメントアウトしている
+  # db_name    = "scalable-todo-db"
 
   engine         = "postgres"
   engine_version = "17"
