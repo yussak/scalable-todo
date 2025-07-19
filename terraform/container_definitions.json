@@ -1,7 +1,7 @@
 [
   {
     "name": "backend",
-    "image": "160715709398.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:backend-latest",
+    "image": "287191041615.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:backend-latest",
     "essential": true,
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -38,7 +38,7 @@
   },
   {
     "name": "frontend",
-    "image": "160715709398.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:frontend-latest",
+    "image": "287191041615.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:frontend-latest",
     "essential": true,
     "logConfiguration": {
       "logDriver": "awslogs",
