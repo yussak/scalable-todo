@@ -586,7 +586,6 @@ data "aws_iam_policy_document" "ecs_task_execution" {
     actions = [
       "ssm:GetParameters",
       "kms:Decrypt",
-      # ECR用権限
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchCheckLayerAvailability",
       "ecr:DescribeRepositories",
@@ -728,7 +727,7 @@ resource "aws_db_instance" "scalable-todo-db" {
   # db_name    = "scalable-todo-db"
 
   engine         = "postgres"
-  engine_version = "17"
+  engine_version = "17.4"
 
   # todo: t3.microにする
   instance_class = "db.t3.micro"
