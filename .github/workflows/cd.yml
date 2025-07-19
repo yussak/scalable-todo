@@ -1,0 +1,107 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 手動実行も可能
+
+env:
+  # todo: 定数で用意して読むようにしたい
+  AWS_REGION: ap-northeast-1
+  ECR_REGISTRY: 287191041615.dkr.ecr.ap-northeast-1.amazonaws.com
+  ECR_REPOSITORY: app-repo
+  ECS_SERVICE_BACKEND: backend
+  ECS_SERVICE_FRONTEND: frontend
+  ECS_CLUSTER: app-cluster
+
+jobs:
+  deploy:
+    name: Deploy to ECS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # AWS認証設定
+      # GitHub Secretsで以下を設定する必要がある
+      # - AWS_ACCESS_KEY_ID
+      # - AWS_SECRET_ACCESS_KEY
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ECRにログイン
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Backend Docker イメージをビルド・プッシュ
+      - name: Build and push backend image
+        run: |
+          cd backend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:backend-latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:backend-latest
+          echo "backend_image=$ECR_REGISTRY/$ECR_REPOSITORY:backend-latest" >> $GITHUB_OUTPUT
+        id: build-backend
+
+      # Frontend Docker イメージをビルド・プッシュ
+      - name: Build and push frontend image
+        run: |
+          cd frontend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-latest
+          echo "frontend_image=$ECR_REGISTRY/$ECR_REPOSITORY:frontend-latest" >> $GITHUB_OUTPUT
+        id: build-frontend
+
+      # ECS Backend サービスを強制的に新しいデプロイメントで更新
+      - name: Force new deployment for backend service
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE_BACKEND \
+            --force-new-deployment \
+            --region $AWS_REGION
+
+      # ECS Frontend サービスを強制的に新しいデプロイメントで更新
+      - name: Force new deployment for frontend service
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE_FRONTEND \
+            --force-new-deployment \
+            --region $AWS_REGION
+
+      # デプロイメント完了を待機
+      - name: Wait for backend service deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE_BACKEND \
+            --region $AWS_REGION
+
+      - name: Wait for frontend service deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE_FRONTEND \
+            --region $AWS_REGION
+
+      - name: Deployment completed
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "Backend image: ${{ steps.build-backend.outputs.backend_image }}"
+          echo "Frontend image: ${{ steps.build-frontend.outputs.frontend_image }}"
+
+# 必要なGitHub Secrets設定:
+# 1. Repository Settings > Secrets and variables > Actions で以下を設定:
+#    - AWS_ACCESS_KEY_ID: AWSアクセスキーID
+#    - AWS_SECRET_ACCESS_KEY: AWSシークレットアクセスキー
+#
+# 2. IAMユーザーには以下の権限が必要:
+#    - AmazonEC2ContainerRegistryPowerUser
+#    - AmazonECS_FullAccess
+#    または、より制限的なカスタムポリシー
