@@ -7,38 +7,39 @@ module "describe_regions_for_ec2" {
   policy     = module.describe_regions_for_ec2.allow_describe_regions_policy
 }
 
-# ログローテーションバケット（AWS各種サービスがログを保存するバケット）
-resource "aws_s3_bucket" "alb_log" {
-  bucket = "alb-log-tf-practice-yus"
-
-  # 強制削除（一時的に有効化）
-  force_destroy = true
-  lifecycle_rule {
-    enabled = true
-
-    expiration {
-      days = "180"
-    }
-  }
-}
-
-resource "aws_s3_bucket_policy" "alb_log" {
-  bucket = aws_s3_bucket.alb_log.id
-  policy = data.aws_iam_policy_document.alb_log.json
-}
-
-data "aws_iam_policy_document" "alb_log" {
-  statement {
-    effect    = "Allow"
-    actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${aws_s3_bucket.alb_log.id}/*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = ["582318560864"]
-    }
-  }
-}
+# todo: 後でコメント解除予定
+# # ログローテーションバケット（AWS各種サービスがログを保存するバケット）
+# resource "aws_s3_bucket" "alb_log" {
+#   bucket = "alb-log-tf-practice-yus"
+# 
+#   # 強制削除（一時的に有効化）
+#   force_destroy = true
+#   lifecycle_rule {
+#     enabled = true
+# 
+#     expiration {
+#       days = "180"
+#     }
+#   }
+# }
+# 
+# resource "aws_s3_bucket_policy" "alb_log" {
+#   bucket = aws_s3_bucket.alb_log.id
+#   policy = data.aws_iam_policy_document.alb_log.json
+# }
+# 
+# data "aws_iam_policy_document" "alb_log" {
+#   statement {
+#     effect    = "Allow"
+#     actions   = ["s3:PutObject"]
+#     resources = ["arn:aws:s3:::${aws_s3_bucket.alb_log.id}/*"]
+# 
+#     principals {
+#       type        = "AWS"
+#       identifiers = ["582318560864"]
+#     }
+#   }
+# }
 
 resource "aws_vpc" "app" {
   cidr_block = "10.0.0.0/16"
@@ -192,15 +193,17 @@ resource "aws_lb" "app" {
     aws_subnet.public_1.id,
   ]
 
-  access_logs {
-    bucket  = aws_s3_bucket.alb_log.id
-    enabled = true
-  }
+  # todo: 後でコメント解除予定
+  # access_logs {
+  #   bucket  = aws_s3_bucket.alb_log.id
+  #   enabled = true
+  # }
 
   security_groups = [
     module.http_sg.security_group_id,
-    module.https_sg.security_group_id,
-    module.http_redirect_sg.security_group_id,
+    # todo: 後でコメント解除予定
+    # module.https_sg.security_group_id,
+    # module.http_redirect_sg.security_group_id,
     module.frontend_sg.security_group_id,
   ]
 }
@@ -217,21 +220,22 @@ module "http_sg" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-module "https_sg" {
-  source      = "./security_group"
-  name        = "https-sg"
-  vpc_id      = aws_vpc.app.id
-  port        = 443
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
-module "http_redirect_sg" {
-  source      = "./security_group"
-  name        = "http-redirect-sg"
-  vpc_id      = aws_vpc.app.id
-  port        = 8080
-  cidr_blocks = ["0.0.0.0/0"]
-}
+# todo: 後でコメント解除予定
+# module "https_sg" {
+#   source      = "./security_group"
+#   name        = "https-sg"
+#   vpc_id      = aws_vpc.app.id
+#   port        = 443
+#   cidr_blocks = ["0.0.0.0/0"]
+# }
+# 
+# module "http_redirect_sg" {
+#   source      = "./security_group"
+#   name        = "http-redirect-sg"
+#   vpc_id      = aws_vpc.app.id
+#   port        = 8080
+#   cidr_blocks = ["0.0.0.0/0"]
+# }
 
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
@@ -249,115 +253,118 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# ホストゾーン
-# DNSレコードを束ねるリソースで、Route53でドメイン登録した場合は自動的に作成される。そのホストゾーンは以下で参照する
-data "aws_route53_zone" "main" {
-  name = "pf-goal-app.net"
-}
+# todo: 後でコメント解除予定
+# # ホストゾーン
+# # DNSレコードを束ねるリソースで、Route53でドメイン登録した場合は自動的に作成される。そのホストゾーンは以下で参照する
+# data "aws_route53_zone" "main" {
+#   name = "pf-goal-app.net"
+# }
+# 
+# # DNSレコードの定義
+# # 設定したドメインでALBにアクセスできるようになる
+# resource "aws_route53_record" "main" {
+#   zone_id = data.aws_route53_zone.main.zone_id
+#   name    = data.aws_route53_zone.main.name
+#   type    = "A"
+# 
+#   alias {
+#     name                   = aws_lb.app.dns_name
+#     zone_id                = aws_lb.app.zone_id
+#     evaluate_target_health = true
+#   }
+# }
+# 
+# resource "aws_route53_record" "api" {
+#   zone_id = data.aws_route53_zone.main.zone_id
+#   name    = "api.pf-goal-app.net"
+#   type    = "A"
+# 
+#   alias {
+#     name                   = aws_lb.app.dns_name
+#     zone_id                = aws_lb.app.zone_id
+#     evaluate_target_health = true
+#   }
+# }
+# 
+# output "domain_name" {
+#   value = aws_route53_record.main.name
+# }
 
-# DNSレコードの定義
-# 設定したドメインでALBにアクセスできるようになる
-resource "aws_route53_record" "main" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = data.aws_route53_zone.main.name
-  type    = "A"
+# todo: 後でコメント解除予定
+# # SSL証明書の作成
+# resource "aws_acm_certificate" "app" {
+#   domain_name = aws_route53_record.main.name
+# 
+#   # ドメイン名を追加したい場合、以下に追加する。例えば["test.example.com"]
+#   subject_alternative_names = ["api.pf-goal-app.net"]
+# 
+#   # ドメインの所有権の検証方法を指定
+#   # DNS検証かメール検証を選択できる。SSL証明書を自動更新したい場合、DNS検証を選択
+#   validation_method = "DNS"
+# 
+#   lifecycle {
+#     # 新しい証明書を作ってから古いものと差し替える
+#     create_before_destroy = true
+#   }
+# }
+# 
+# # SSL証明書の検証
+# # DNS検証用のDNSレコードを追加
+# resource "aws_route53_record" "app_certificate" {
+#   for_each = {
+#     for dvo in aws_acm_certificate.app.domain_validation_options : dvo.domain_name => {
+#       name   = dvo.resource_record_name
+#       type   = dvo.resource_record_type
+#       record = dvo.resource_record_value
+#     }
+#   }
+# 
+#   name    = each.value.name
+#   type    = each.value.type
+#   records = [each.value.record]
+#   zone_id = data.aws_route53_zone.main.id
+#   ttl     = 60
+# }
+# 
+# resource "aws_acm_certificate_validation" "app" {
+#   certificate_arn         = aws_acm_certificate.app.arn
+#   validation_record_fqdns = [for record in aws_route53_record.app_certificate : record.fqdn]
+# }
 
-  alias {
-    name                   = aws_lb.app.dns_name
-    zone_id                = aws_lb.app.zone_id
-    evaluate_target_health = true
-  }
-}
-
-resource "aws_route53_record" "api" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = "api.pf-goal-app.net"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.app.dns_name
-    zone_id                = aws_lb.app.zone_id
-    evaluate_target_health = true
-  }
-}
-
-output "domain_name" {
-  value = aws_route53_record.main.name
-}
-
-# SSL証明書の作成
-resource "aws_acm_certificate" "app" {
-  domain_name = aws_route53_record.main.name
-
-  # ドメイン名を追加したい場合、以下に追加する。例えば["test.example.com"]
-  subject_alternative_names = ["api.pf-goal-app.net"]
-
-  # ドメインの所有権の検証方法を指定
-  # DNS検証かメール検証を選択できる。SSL証明書を自動更新したい場合、DNS検証を選択
-  validation_method = "DNS"
-
-  lifecycle {
-    # 新しい証明書を作ってから古いものと差し替える
-    create_before_destroy = true
-  }
-}
-
-# SSL証明書の検証
-# DNS検証用のDNSレコードを追加
-resource "aws_route53_record" "app_certificate" {
-  for_each = {
-    for dvo in aws_acm_certificate.app.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      type   = dvo.resource_record_type
-      record = dvo.resource_record_value
-    }
-  }
-
-  name    = each.value.name
-  type    = each.value.type
-  records = [each.value.record]
-  zone_id = data.aws_route53_zone.main.id
-  ttl     = 60
-}
-
-resource "aws_acm_certificate_validation" "app" {
-  certificate_arn         = aws_acm_certificate.app.arn
-  validation_record_fqdns = [for record in aws_route53_record.app_certificate : record.fqdn]
-}
-
-resource "aws_lb_listener" "https" {
-  load_balancer_arn = aws_lb.app.arn
-  port              = "443"
-  protocol          = "HTTPS"
-  certificate_arn   = aws_acm_certificate.app.arn
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-
-  default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "これはHTTPSです"
-      status_code  = "200"
-    }
-  }
-}
-
-resource "aws_lb_listener" "redirect_http_to_https" {
-  load_balancer_arn = aws_lb.app.arn
-  port              = "8080"
-  protocol          = "HTTP"
-
-  default_action {
-    type = "redirect"
-
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-}
+# todo: 後でコメント解除予定
+# resource "aws_lb_listener" "https" {
+#   load_balancer_arn = aws_lb.app.arn
+#   port              = "443"
+#   protocol          = "HTTPS"
+#   certificate_arn   = aws_acm_certificate.app.arn
+#   ssl_policy        = "ELBSecurityPolicy-2016-08"
+# 
+#   default_action {
+#     type = "fixed-response"
+# 
+#     fixed_response {
+#       content_type = "text/plain"
+#       message_body = "これはHTTPSです"
+#       status_code  = "200"
+#     }
+#   }
+# }
+# 
+# resource "aws_lb_listener" "redirect_http_to_https" {
+#   load_balancer_arn = aws_lb.app.arn
+#   port              = "8080"
+#   protocol          = "HTTP"
+# 
+#   default_action {
+#     type = "redirect"
+# 
+#     redirect {
+#       port        = "443"
+#       protocol    = "HTTPS"
+#       status_code = "HTTP_301"
+#     }
+#   }
+# }
 
 # ターゲットグループ
 # ALBがリクエストをフォワードする対象
@@ -365,7 +372,7 @@ resource "aws_lb_target_group" "frontend" {
   name                 = "tg-frontend"
   target_type          = "ip"
   vpc_id               = aws_vpc.app.id
-  port                 = 3000
+  port                 = 3010
   protocol             = "HTTP"
   deregistration_delay = 300
 
@@ -390,7 +397,7 @@ resource "aws_lb_target_group" "frontend" {
 # リスナールール
 # ターゲットグループにリクエストをフォワードするルール
 resource "aws_lb_listener_rule" "frontend" {
-  listener_arn = aws_lb_listener.https.arn
+  listener_arn = aws_lb_listener.http.arn
   # 優先順位を指定。数字が小さいほど優先度が高い
   priority = 100
 
@@ -400,8 +407,8 @@ resource "aws_lb_listener_rule" "frontend" {
   }
 
   condition {
-    host_header {
-      values = ["pf-goal-app.net"]
+    path_pattern {
+      values = ["/*"]
     }
   }
 }
@@ -410,7 +417,7 @@ resource "aws_lb_target_group" "backend" {
   name                 = "tg-backend"
   target_type          = "ip"
   vpc_id               = aws_vpc.app.id
-  port                 = 5000
+  port                 = 3011
   protocol             = "HTTP"
   deregistration_delay = 300
 
@@ -433,7 +440,7 @@ resource "aws_lb_target_group" "backend" {
 }
 
 resource "aws_lb_listener_rule" "backend" {
-  listener_arn = aws_lb_listener.https.arn
+  listener_arn = aws_lb_listener.http.arn
   priority     = 101
 
   action {
@@ -442,8 +449,8 @@ resource "aws_lb_listener_rule" "backend" {
   }
 
   condition {
-    host_header {
-      values = ["api.pf-goal-app.net"]
+    path_pattern {
+      values = ["/api/*"]
     }
   }
 }
@@ -483,7 +490,7 @@ resource "aws_ecs_service" "backend" {
   load_balancer {
     target_group_arn = aws_lb_target_group.backend.arn
     container_name   = "backend"
-    container_port   = 5000
+    container_port   = 3011
   }
 
   lifecycle {
@@ -495,7 +502,7 @@ module "backend_sg" {
   source      = "./security_group"
   name        = "backend-sg"
   vpc_id      = aws_vpc.app.id
-  port        = 5000
+  port        = 3011
   cidr_blocks = [aws_vpc.app.cidr_block]
 }
 
@@ -524,7 +531,7 @@ resource "aws_ecs_service" "frontend" {
   load_balancer {
     target_group_arn = aws_lb_target_group.frontend.arn
     container_name   = "frontend"
-    container_port   = 3000
+    container_port   = 3010
   }
 
   lifecycle {
@@ -536,7 +543,7 @@ module "frontend_sg" {
   source      = "./security_group"
   name        = "frontend-sg"
   vpc_id      = aws_vpc.app.id
-  port        = 3000
+  port        = 3010
   cidr_blocks = [aws_vpc.app.cidr_block]
 }
 
@@ -599,38 +606,40 @@ resource "aws_ecs_task_definition" "app" {
   execution_role_arn       = module.ecs_task_execution_role.iam_role_arn
 }
 
-# cloudwatchイベントからECSを起動するためのIAMロールを作成する
-module "ecs_events_role" {
-  source     = "./iam_role"
-  name       = "ecs-events"
-  identifier = "events.amazonaws.com"
-  policy     = data.aws_iam_policy.ecs_events_role_policy.policy
-}
+# todo: 後でコメント解除予定
+# # cloudwatchイベントからECSを起動するためのIAMロールを作成する
+# module "ecs_events_role" {
+#   source     = "./iam_role"
+#   name       = "ecs-events"
+#   identifier = "events.amazonaws.com"
+#   policy     = data.aws_iam_policy.ecs_events_role_policy.policy
+# }
+# 
+# data "aws_iam_policy" "ecs_events_role_policy" {
+#   # このポリシーでは「タスクを実行する」権限と「タスクにIAMロールを渡す」権限を付与する
+#   arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+# }
 
-data "aws_iam_policy" "ecs_events_role_policy" {
-  # このポリシーでは「タスクを実行する」権限と「タスクにIAMロールを渡す」権限を付与する
-  arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
-}
-
-# カスタマーキー
-resource "aws_kms_key" "app" {
-  # 使用用途
-  description         = "Customer Master Keyテストです!!"
-  enable_key_rotation = true
-  # キーを有効にするかどうか
-  is_enabled = true
-  # 削除待機期間
-  deletion_window_in_days = 30
-}
-
-# カスタマーキーにはUUIDが割り当てられるが、わかりづらい。なのでエイリアスを設定し、用途をわかりやすくする
-resource "aws_kms_alias" "app" {
-  name          = "alias/app"
-  target_key_id = aws_kms_key.app.key_id
-}
+# todo: 後でコメント解除予定
+# # カスタマーキー
+# resource "aws_kms_key" "app" {
+#   # 使用用途
+#   description         = "Customer Master Keyテストです!!"
+#   enable_key_rotation = true
+#   # キーを有効にするかどうか
+#   is_enabled = true
+#   # 削除待機期間
+#   deletion_window_in_days = 30
+# }
+# 
+# # カスタマーキーにはUUIDが割り当てられるが、わかりづらい。なのでエイリアスを設定し、用途をわかりやすくする
+# resource "aws_kms_alias" "app" {
+#   name          = "alias/app"
+#   target_key_id = aws_kms_key.app.key_id
+# }
 
 # SSMパラメータストア
-# 環境変数をGoアプリなどで使用するため用意
+# 環境変数を使用するため用意
 
 # /db/usernameのキー名で「root」という値を平文で保存
 resource "aws_ssm_parameter" "db_username" {
@@ -676,16 +685,11 @@ resource "aws_ssm_parameter" "db_dbname" {
 # MySQLのmy.cnfファイルに定義するようなDBの設定を以下のDBパラメータグループに書く
 resource "aws_db_parameter_group" "app" {
   name   = "db-parameter-group"
-  family = "mysql8.0"
+  family = "postgres17"
 
   parameter {
-    name  = "character_set_database"
-    value = "utf8mb4"
-  }
-
-  parameter {
-    name  = "character_set_server"
-    value = "utf8mb4"
+    name  = "shared_preload_libraries"
+    value = "pg_stat_statements"
   }
 }
 
@@ -694,12 +698,8 @@ resource "aws_db_parameter_group" "app" {
 # ユーザーのログインや実行したクエリなどのアクティビティを記録できる
 resource "aws_db_option_group" "app" {
   name                 = "db-option-group"
-  engine_name          = "mysql"
-  major_engine_version = "8.0"
-
-  option {
-    option_name = "MARIADB_AUDIT_PLUGIN"
-  }
+  engine_name          = "postgres"
+  major_engine_version = "17"
 }
 
 # DBを駆動させるサブネット
@@ -714,8 +714,8 @@ resource "aws_db_instance" "scalable-todo-db" {
   identifier = "scalable-todo-db"
   db_name    = "scalable-todo-db"
 
-  engine         = "mysql"
-  engine_version = "8.0.33"
+  engine         = "postgres"
+  engine_version = "17"
 
   # todo: t3.microにする
   instance_class = "db.t3.micro"
@@ -727,17 +727,18 @@ resource "aws_db_instance" "scalable-todo-db" {
   storage_type      = "gp2"
   storage_encrypted = true
 
-  kms_key_id = aws_kms_key.app.arn
+  # kms_key_id = aws_kms_key.app.arn
 
   username = aws_ssm_parameter.db_username.value
 
   # このパスワードは使わず、以下のコマンド（例）で上書きする。ssmの/db/passwordと値を合わせる
   # aws rds modify-db-instance --db-instance-identifier 'scalable-todo-db' \
   # --master-user-password 'newPassword123!'
+  # todo: ここSSMなど使えないのか確認
   password = "password"
 
 
-  multi_az = true
+  multi_az = false
   # falseでVPC外からのアクセスを遮断する
   publicly_accessible = false
 
@@ -756,7 +757,7 @@ resource "aws_db_instance" "scalable-todo-db" {
   # deletion_protection = true
   # skip_final_snapshot = false
 
-  port = 3306
+  port = 5432
 
   # 設定変更のタイミング
   # RDSでは一部の設定に再起動が伴い、予期せぬダウンタイムが起こりえる。なのでfalseにして即時反映させない
@@ -777,9 +778,9 @@ resource "aws_db_instance" "scalable-todo-db" {
 # DBはVPC内からの通信のみ許可する
 module "mysql_sg" {
   source      = "./security_group"
-  name        = "mysql-sg"
+  name        = "postgres-sg"
   vpc_id      = aws_vpc.app.id
-  port        = 3306
+  port        = 5432
   cidr_blocks = [aws_vpc.app.cidr_block]
 }
 

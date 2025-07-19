@@ -32,7 +32,7 @@
     "portMappings": [
       {
         "protocol": "tcp",
-        "containerPort": 5000
+        "containerPort": 3011
       }
     ]
   },
@@ -52,7 +52,7 @@
     "portMappings": [
       {
         "protocol": "tcp",
-        "containerPort": 3000
+        "containerPort": 3010
       }
     ]
   }
