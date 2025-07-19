@@ -2,7 +2,8 @@ name: Deploy to AWS ECS
 
 on:
   push:
-    branches: [main]
+    # feature branch -> main -> releaseにマージ
+    branches: [release]
   workflow_dispatch: # 手動実行も可能
 
 env:
