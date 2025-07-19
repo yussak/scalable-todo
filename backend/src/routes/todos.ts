@@ -30,6 +30,49 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+router.get("/:id", async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.query;
+
+    if (!userId) {
+      res.status(400).json({ error: "userId is required" });
+      return;
+    }
+
+    const todoId = parseInt(id, 10);
+    const userIdNum = parseInt(userId as string, 10);
+
+    if (isNaN(todoId)) {
+      res.status(400).json({ error: "Invalid todo ID" });
+      return;
+    }
+
+    if (isNaN(userIdNum)) {
+      res.status(400).json({ error: "Invalid userId" });
+      return;
+    }
+
+    const todo = await prisma.todo.findFirst({
+      where: {
+        id: todoId,
+        userId: userIdNum,
+      },
+      include: { user: true },
+    });
+
+    if (!todo) {
+      res.status(404).json({ error: "Todo not found" });
+      return;
+    }
+
+    res.json(todo);
+  } catch (error) {
+    console.error("Error fetching todo:", error);
+    res.status(500).json({ error: "Failed to fetch todo" });
+  }
+});
+
 router.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description, userId } = req.body;

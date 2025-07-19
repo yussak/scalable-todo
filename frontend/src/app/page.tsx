@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useAuth } from "./contexts/AuthContext";
 import TodoForm from "./components/TodoForm";
 import api from "@/lib/api";
@@ -230,6 +231,12 @@ export default function Home() {
                         </span>
                       </div>
                       <div className="flex gap-2">
+                        <Link
+                          href={`/todos/${todo.id}`}
+                          className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+                        >
+                          詳細
+                        </Link>
                         <button
                           onClick={() => startEdit(todo)}
                           className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"

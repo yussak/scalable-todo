@@ -468,6 +468,15 @@ resource "aws_ecs_service" "backend" {
   cluster         = aws_ecs_cluster.app.arn
   task_definition = aws_ecs_task_definition.app.arn
 
+  # ECSタスクが/db/hostnameのSSMパラメータを参照するため、
+  # RDS作成とSSMパラメータ設定完了まで待機する必要がある
+  depends_on = [
+    aws_ssm_parameter.db_hostname,
+    aws_ssm_parameter.db_dbname,
+    aws_ssm_parameter.db_username,
+    aws_ssm_parameter.db_password
+  ]
+
   # ECSサービスが維持するタスク数
   # 1を指定するとコンテナが異常終了するとECSサービスがタスクを再起動するまでアクセスできなくなるので2以上を指定
   desired_count = 2
@@ -690,8 +699,9 @@ resource "aws_db_parameter_group" "app" {
   family = "postgres17"
 
   parameter {
-    name  = "shared_preload_libraries"
-    value = "pg_stat_statements"
+    name         = "shared_preload_libraries"
+    value        = "pg_stat_statements"
+    apply_method = "pending-reboot"
   }
 }
 

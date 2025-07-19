@@ -170,6 +170,94 @@ describe("DELETE /api/todos/:id", () => {
   });
 });
 
+describe("GET /api/todos/:id", () => {
+  it("should return 404 when todo not found", async () => {
+    const response = await request(app).get(
+      `/api/todos/999?userId=${testUser.id}`
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ error: "Todo not found" });
+  });
+
+  it("should return 400 when userId is not provided", async () => {
+    const response = await request(app).get("/api/todos/1");
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: "userId is required" });
+  });
+
+  it("should return 400 when todo ID is invalid", async () => {
+    const response = await request(app).get(
+      `/api/todos/invalid?userId=${testUser.id}`
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: "Invalid todo ID" });
+  });
+
+  it("should return 400 when userId is invalid", async () => {
+    const response = await request(app).get("/api/todos/1?userId=invalid");
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: "Invalid userId" });
+  });
+
+  it("should return a specific todo when it exists", async () => {
+    const createdTodo = await prisma.todo.create({
+      data: {
+        title: "Test Todo",
+        description: "Test Description",
+        completed: false,
+        userId: testUser.id,
+      },
+    });
+
+    const response = await request(app).get(
+      `/api/todos/${createdTodo.id}?userId=${testUser.id}`
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      id: createdTodo.id,
+      title: "Test Todo",
+      description: "Test Description",
+      completed: false,
+      userId: testUser.id,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      user: expect.objectContaining({
+        id: testUser.id,
+        email: testUser.email,
+      }),
+    });
+  });
+
+  it("should return 404 when todo belongs to different user", async () => {
+    const anotherUser = await prisma.user.create({
+      data: {
+        email: `another-${Date.now()}@example.test`,
+        password: "hashedPassword123",
+      },
+    });
+
+    const createdTodo = await prisma.todo.create({
+      data: {
+        title: "Another User Todo",
+        description: "Description",
+        userId: anotherUser.id,
+      },
+    });
+
+    const response = await request(app).get(
+      `/api/todos/${createdTodo.id}?userId=${testUser.id}`
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ error: "Todo not found" });
+  });
+});
+
 describe("PUT /api/todos/:id", () => {
   it("should return 404 when todo not found", async () => {
     const updateData = {
