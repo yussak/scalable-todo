@@ -44,3 +44,15 @@ coverage/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+*.tfplan
+.terraform.tfstate.lock.info
+terraform.tfvars
+*.auto.tfvars
+override.tf
+override.tf.json
+
