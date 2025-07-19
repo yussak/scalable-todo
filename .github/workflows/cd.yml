@@ -43,7 +43,7 @@ jobs:
       - name: Build and push backend image
         run: |
           cd backend
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:backend-latest .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:backend-latest --target prod .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:backend-latest
           echo "backend_image=$ECR_REGISTRY/$ECR_REPOSITORY:backend-latest" >> $GITHUB_OUTPUT
         id: build-backend
@@ -52,7 +52,7 @@ jobs:
       - name: Build and push frontend image
         run: |
           cd frontend
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-latest .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-latest --target prod .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-latest
           echo "frontend_image=$ECR_REGISTRY/$ECR_REPOSITORY:frontend-latest" >> $GITHUB_OUTPUT
         id: build-frontend
