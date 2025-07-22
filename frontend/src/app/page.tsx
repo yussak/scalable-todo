@@ -185,6 +185,38 @@ export default function Home() {
     }
   };
 
+  const removeReaction = async (todoId: number, emoji: string) => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/todos/${todoId}/reactions`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ emoji }),
+        }
+      );
+
+      if (response.ok) {
+        // リアクション一覧を更新
+        console.log("Reaction removed successfully:", emoji);
+        fetchTodos();
+      } else {
+        console.error(
+          "Failed to remove reaction:",
+          response.status,
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Failed to remove reaction:", error);
+    }
+  };
+
   useEffect(() => {
     if (user?.id) {
       fetchTodos();
@@ -332,13 +364,14 @@ export default function Home() {
                             {} as Record<string, number>
                           )
                         ).map(([emoji, count]) => (
-                          <span
+                          <button
                             key={emoji}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-sm"
+                            onClick={() => removeReaction(todo.id, emoji)}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-pointer"
                           >
                             <span>{emoji}</span>
                             <span className="text-gray-600">{count}</span>
-                          </span>
+                          </button>
                         ))}
                       </div>
                     )}
