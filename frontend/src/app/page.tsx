@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { useAuth } from "./contexts/AuthContext";
 import TodoForm from "./components/TodoForm";
-import { ReactionPicker } from "./components/ReactionPicker";
+import TodoItem from "./components/TodoItem";
 import api from "@/lib/api";
 
 interface Reaction {
@@ -304,78 +303,13 @@ export default function Home() {
                   </div>
                 ) : (
                   // 表示モード
-                  <>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {todo.title}
-                    </h3>
-                    {todo.description && (
-                      <p className="text-gray-600 mb-4">{todo.description}</p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            todo.completed
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {todo.completed ? "完了" : "未完了"}
-                        </span>
-                        <span>
-                          {new Date(todo.createdAt).toLocaleDateString("ja-JP")}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/todos/${todo.id}`}
-                          className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
-                        >
-                          詳細
-                        </Link>
-                        <button
-                          onClick={() => startEdit(todo)}
-                          className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
-                        >
-                          編集
-                        </button>
-                        <button
-                          onClick={() => deleteTodo(todo.id)}
-                          className="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          削除
-                        </button>
-                        <ReactionPicker
-                          todoId={todo.id}
-                          onReactionAdd={(emoji) => addReaction(todo.id, emoji)}
-                        />
-                      </div>
-                    </div>
-                    {/* リアクション表示 */}
-                    {todo.reactions && todo.reactions.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {Object.entries(
-                          todo.reactions.reduce(
-                            (acc, reaction) => {
-                              acc[reaction.emoji] =
-                                (acc[reaction.emoji] || 0) + 1;
-                              return acc;
-                            },
-                            {} as Record<string, number>
-                          )
-                        ).map(([emoji, count]) => (
-                          <button
-                            key={emoji}
-                            onClick={() => removeReaction(todo.id, emoji)}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-pointer"
-                          >
-                            <span>{emoji}</span>
-                            <span className="text-gray-600">{count}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </>
+                  <TodoItem
+                    todo={todo}
+                    onEdit={startEdit}
+                    onDelete={deleteTodo}
+                    onReactionAdd={addReaction}
+                    onReactionRemove={removeReaction}
+                  />
                 )}
               </div>
             ))
