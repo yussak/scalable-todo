@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "./contexts/AuthContext";
 import TodoForm from "./components/TodoForm";
+import { ReactionPicker } from "./components/ReactionPicker";
 import api from "@/lib/api";
 
 interface Todo {
@@ -118,6 +119,37 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Failed to update todo:", error);
+    }
+  };
+
+  const addReaction = async (todoId: number, emoji: string) => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/todos/${todoId}/reactions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ emoji }),
+        }
+      );
+
+      if (response.ok) {
+        // TODO: リアクション一覧を更新
+        console.log("Reaction added successfully:", emoji);
+      } else {
+        console.error(
+          "Failed to add reaction:",
+          response.status,
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Failed to add reaction:", error);
     }
   };
 
@@ -249,6 +281,10 @@ export default function Home() {
                         >
                           削除
                         </button>
+                        <ReactionPicker
+                          todoId={todo.id}
+                          onReactionAdd={(emoji) => addReaction(todo.id, emoji)}
+                        />
                       </div>
                     </div>
                   </>
