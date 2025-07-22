@@ -7,6 +7,7 @@ vi.mock("../../models/Reaction.js", () => ({
   ReactionModel: {
     create: vi.fn(),
     findByTodo: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
@@ -88,5 +89,54 @@ describe("ReactionController", () => {
 
     expect(ReactionModel.findByTodo).toHaveBeenCalledWith(1);
     expect(mockRes.json).toHaveBeenCalledWith(mockReactions);
+  });
+
+  describe("removeReaction", () => {
+    it("正常なリクエストで204ステータスを返す", async () => {
+      const mockDeletedReaction = { id: 1, todoId: 1, userId: 1, emoji: "👍" };
+      (ReactionModel.delete as any).mockResolvedValue(mockDeletedReaction);
+
+      const mockReq = {
+        params: { id: "1" },
+        body: { emoji: "👍" },
+        user: { id: 1 },
+      } as any;
+
+      const mockRes = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      } as any;
+
+      await ReactionController.removeReaction(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(204);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        message: "Reaction removed successfully",
+      });
+    });
+
+    it("ReactionModelのdeleteメソッドが正しいパラメータで呼ばれる", async () => {
+      const mockDeletedReaction = { id: 1, todoId: 1, userId: 1, emoji: "👍" };
+      (ReactionModel.delete as any).mockResolvedValue(mockDeletedReaction);
+
+      const mockReq = {
+        params: { id: "1" },
+        body: { emoji: "👍" },
+        user: { id: 1 },
+      } as any;
+
+      const mockRes = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      } as any;
+
+      await ReactionController.removeReaction(mockReq, mockRes);
+
+      expect(ReactionModel.delete).toHaveBeenCalledWith({
+        todoId: 1,
+        userId: 1,
+        emoji: "👍",
+      });
+    });
   });
 });

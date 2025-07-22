@@ -20,4 +20,18 @@ export const ReactionController = {
     const reactions = await ReactionModel.findByTodo(todoId);
     res.json(reactions);
   },
+
+  removeReaction: async (req: any, res: any) => {
+    const todoId = parseInt(req.params.id);
+    const userId = req.user.id;
+    const emoji = req.body.emoji;
+
+    await ReactionModel.delete({
+      todoId,
+      userId,
+      emoji,
+    });
+
+    res.status(204).json({ message: "Reaction removed successfully" });
+  },
 };
