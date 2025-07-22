@@ -9,6 +9,7 @@
 - always answer in Japanese.
 - 既存のコードが常に正とは限らないので、鵜呑みにせず回答を作る
 - backendは一旦はMVCで作る(Vはfrontendが担当するので無し)
+- パッケージマネージャーはyarnを使用
 
 <law>
 AI 運用 6 原則
