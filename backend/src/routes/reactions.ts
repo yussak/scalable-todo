@@ -11,8 +11,7 @@ router.post("/:id/reactions", authenticateToken, async (req, res) => {
 
 // GET /api/todos/:id/reactions - リアクション一覧取得
 router.get("/:id/reactions", async (req, res) => {
-  // TODO: getReactions実装後に追加
-  res.status(501).json({ error: "Not implemented yet" });
+  await ReactionController.getReactions(req, res);
 });
 
 // DELETE /api/todos/:id/reactions - リアクション削除（トグル）

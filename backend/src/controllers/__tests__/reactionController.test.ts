@@ -6,6 +6,7 @@ import { ReactionModel } from "../../models/Reaction.js";
 vi.mock("../../models/Reaction.js", () => ({
   ReactionModel: {
     create: vi.fn(),
+    findByTodo: vi.fn(),
   },
 }));
 
@@ -65,5 +66,27 @@ describe("ReactionController", () => {
       emoji: "👍",
     });
     expect(mockRes.json).toHaveBeenCalledWith(mockReactionData);
+  });
+
+  it("getReactionsメソッドがTodoのリアクション一覧を返す", async () => {
+    const mockReactions = [
+      { id: 1, todoId: 1, userId: 1, emoji: "👍", createdAt: new Date() },
+      { id: 2, todoId: 1, userId: 2, emoji: "❤️", createdAt: new Date() },
+    ];
+
+    (ReactionModel.findByTodo as any).mockResolvedValue(mockReactions);
+
+    const mockReq = {
+      params: { id: "1" },
+    } as any;
+
+    const mockRes = {
+      json: vi.fn(),
+    } as any;
+
+    await ReactionController.getReactions(mockReq, mockRes);
+
+    expect(ReactionModel.findByTodo).toHaveBeenCalledWith(1);
+    expect(mockRes.json).toHaveBeenCalledWith(mockReactions);
   });
 });

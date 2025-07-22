@@ -14,4 +14,10 @@ export const ReactionController = {
 
     res.status(201).json(reaction);
   },
+
+  getReactions: async (req: any, res: any) => {
+    const todoId = parseInt(req.params.id);
+    const reactions = await ReactionModel.findByTodo(todoId);
+    res.json(reactions);
+  },
 };
