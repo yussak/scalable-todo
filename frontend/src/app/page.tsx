@@ -7,6 +7,14 @@ import TodoForm from "./components/TodoForm";
 import { ReactionPicker } from "./components/ReactionPicker";
 import api from "@/lib/api";
 
+interface Reaction {
+  id: number;
+  todoId: number;
+  userId: number;
+  emoji: string;
+  createdAt: string;
+}
+
 interface Todo {
   id: number;
   title: string;
@@ -19,6 +27,7 @@ interface Todo {
     id: number;
     email: string;
   };
+  reactions?: Reaction[];
 }
 
 export default function Home() {
@@ -38,8 +47,30 @@ export default function Home() {
     try {
       const response = await api.get(`/todos?userId=${user.id}`);
       if (response.ok) {
-        const data = await response.json();
-        setTodos(data);
+        const todos = await response.json();
+
+        // 各Todoのリアクションを取得
+        const todosWithReactions = await Promise.all(
+          todos.map(async (todo: Todo) => {
+            try {
+              const reactionsResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/todos/${todo.id}/reactions`
+              );
+              if (reactionsResponse.ok) {
+                const reactions = await reactionsResponse.json();
+                return { ...todo, reactions };
+              }
+            } catch (error) {
+              console.error(
+                `Failed to fetch reactions for todo ${todo.id}:`,
+                error
+              );
+            }
+            return todo;
+          })
+        );
+
+        setTodos(todosWithReactions);
       }
     } catch (error) {
       console.error("Failed to fetch todos:", error);
@@ -139,8 +170,9 @@ export default function Home() {
       );
 
       if (response.ok) {
-        // TODO: リアクション一覧を更新
+        // リアクション一覧を更新
         console.log("Reaction added successfully:", emoji);
+        fetchTodos();
       } else {
         console.error(
           "Failed to add reaction:",
@@ -287,6 +319,29 @@ export default function Home() {
                         />
                       </div>
                     </div>
+                    {/* リアクション表示 */}
+                    {todo.reactions && todo.reactions.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {Object.entries(
+                          todo.reactions.reduce(
+                            (acc, reaction) => {
+                              acc[reaction.emoji] =
+                                (acc[reaction.emoji] || 0) + 1;
+                              return acc;
+                            },
+                            {} as Record<string, number>
+                          )
+                        ).map(([emoji, count]) => (
+                          <span
+                            key={emoji}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-sm"
+                          >
+                            <span>{emoji}</span>
+                            <span className="text-gray-600">{count}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
