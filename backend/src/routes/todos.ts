@@ -17,7 +17,7 @@ async function validateAndGetTodo(
     where: { id: todoId },
   });
 
-  if (!todo) {
+  if (todo == null) {
     res.status(404).json({ error: "Todo not found" });
     return null;
   }
@@ -31,7 +31,7 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.query;
 
-    if (!userId) {
+    if (userId == null || userId.trim().length === 0) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -59,7 +59,7 @@ router.get("/:id", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { userId } = req.query;
 
-    if (!userId) {
+    if (userId == null || userId.trim().length === 0) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -85,7 +85,7 @@ router.get("/:id", async (req: Request, res: Response): Promise<void> => {
       include: { user: true },
     });
 
-    if (!todo) {
+    if (todo == null) {
       res.status(404).json({ error: "Todo not found" });
       return;
     }
@@ -101,12 +101,12 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description, userId } = req.body;
 
-    if (!title) {
+    if (title == null || title.trim().length === 0) {
       res.status(400).json({ error: "Title is required" });
       return;
     }
 
-    if (!userId) {
+    if (userId == null || userId.trim().length === 0) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -144,12 +144,12 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (!title || title.trim() === "") {
+    if (title == null || title.trim().length === 0) {
       res.status(400).json({ error: "Title is required" });
       return;
     }
 
-    if (!userId) {
+    if (userId == null || userId.trim().length === 0) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -197,7 +197,7 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (!userId) {
+    if (userId == null || userId.trim().length === 0) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -241,13 +241,13 @@ router.post(
       const { id } = req.params;
       const { content } = req.body;
 
-      if (!content) {
+      if (content == null || content.trim().length === 0) {
         res.status(400).json({ error: "Content is required" });
         return;
       }
 
       const validation = await validateAndGetTodo(id, res);
-      if (!validation) {
+      if (validation == null) {
         return;
       }
 
@@ -277,7 +277,7 @@ router.get(
       const { id } = req.params;
 
       const validation = await validateAndGetTodo(id, res);
-      if (!validation) {
+      if (validation == null) {
         return;
       }
 
@@ -304,7 +304,7 @@ router.delete(
       const { id, commentId } = req.params;
 
       const validation = await validateAndGetTodo(id, res);
-      if (!validation) {
+      if (validation == null) {
         return;
       }
 
@@ -324,7 +324,7 @@ router.delete(
         },
       });
 
-      if (!comment) {
+      if (comment == null) {
         res.status(404).json({ error: "Comment not found" });
         return;
       }
