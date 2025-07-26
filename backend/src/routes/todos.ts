@@ -300,4 +300,50 @@ router.get(
   }
 );
 
+router.delete(
+  "/:id/comments/:commentId",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id, commentId } = req.params;
+
+      const validation = await validateAndGetTodo(id, res);
+      if (!validation) {
+        return; // Response already sent by validateAndGetTodo
+      }
+
+      const { todoId } = validation;
+
+      // Comment IDのバリデーション
+      const commentIdNum = parseInt(commentId, 10);
+      if (isNaN(commentIdNum)) {
+        res.status(400).json({ error: "Invalid comment ID" });
+        return;
+      }
+
+      // Commentの存在確認
+      const comment = await prisma.comment.findFirst({
+        where: {
+          id: commentIdNum,
+          todoId,
+        },
+      });
+
+      if (!comment) {
+        res.status(404).json({ error: "Comment not found" });
+        return;
+      }
+
+      // Commentを削除
+      await prisma.comment.delete({
+        where: { id: commentIdNum },
+      });
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).json({ error: "Failed to delete comment" });
+    }
+  }
+);
+
 export default router;

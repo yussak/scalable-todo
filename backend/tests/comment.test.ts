@@ -96,3 +96,59 @@ describe("GET /api/todos/:todoId/comments", () => {
     expect(response.body.error).toBe("Invalid todo ID");
   });
 });
+
+describe("DELETE /api/todos/:todoId/comments/:commentId", () => {
+  it("should delete a comment successfully", async () => {
+    // Create a comment first
+    const createResponse = await request(app)
+      .post(`/api/todos/${testTodo.id}/comments`)
+      .send({ content: "Comment to delete" })
+      .expect(201);
+
+    const commentId = createResponse.body.id;
+
+    // Delete the comment
+    await request(app)
+      .delete(`/api/todos/${testTodo.id}/comments/${commentId}`)
+      .expect(204);
+
+    // Verify comment is deleted
+    const getResponse = await request(app)
+      .get(`/api/todos/${testTodo.id}/comments`)
+      .expect(200);
+
+    expect(getResponse.body).toHaveLength(0);
+  });
+
+  it("should return 404 for non-existent comment", async () => {
+    const response = await request(app)
+      .delete(`/api/todos/${testTodo.id}/comments/99999`)
+      .expect(404);
+
+    expect(response.body.error).toBe("Comment not found");
+  });
+
+  it("should return 404 for non-existent todo", async () => {
+    const response = await request(app)
+      .delete("/api/todos/99999/comments/1")
+      .expect(404);
+
+    expect(response.body.error).toBe("Todo not found");
+  });
+
+  it("should return 400 for invalid todo ID", async () => {
+    const response = await request(app)
+      .delete("/api/todos/invalid/comments/1")
+      .expect(400);
+
+    expect(response.body.error).toBe("Invalid todo ID");
+  });
+
+  it("should return 400 for invalid comment ID", async () => {
+    const response = await request(app)
+      .delete(`/api/todos/${testTodo.id}/comments/invalid`)
+      .expect(400);
+
+    expect(response.body.error).toBe("Invalid comment ID");
+  });
+});
