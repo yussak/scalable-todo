@@ -7,18 +7,18 @@ on:
   workflow_dispatch: # 手動実行も可能
 
 env:
-  # todo: 定数で用意して読むようにしたい
-  AWS_REGION: ap-northeast-1
-  ECR_REGISTRY: 287191041615.dkr.ecr.ap-northeast-1.amazonaws.com
-  ECR_REPOSITORY: app-repo
-  ECS_SERVICE_BACKEND: backend
-  ECS_SERVICE_FRONTEND: frontend
-  ECS_CLUSTER: app-cluster
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  ECS_SERVICE_BACKEND: ${{ vars.ECS_SERVICE_BACKEND }}
+  ECS_SERVICE_FRONTEND: ${{ vars.ECS_SERVICE_FRONTEND }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
 
 jobs:
   deploy:
     name: Deploy to ECS
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout code
