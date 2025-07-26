@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
+import { CommentForm } from "@/app/components/CommentForm";
 
 interface Todo {
   id: number;
@@ -131,6 +132,18 @@ export default function TodoDetail({
                 <span className="font-medium">更新日:</span>{" "}
                 {new Date(todo.updatedAt).toLocaleString("ja-JP")}
               </p>
+            </div>
+          </div>
+
+          {/* コメントセクション */}
+          <div className="mt-6 bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">コメント</h2>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                新しいコメントを投稿
+              </h3>
+              <CommentForm todoId={todo.id} onCommentAdd={() => {}} />
             </div>
           </div>
         </div>

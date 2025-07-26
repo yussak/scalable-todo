@@ -200,4 +200,50 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// Comment routes
+router.post(
+  "/:id/comments",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { content } = req.body;
+      const todoId = parseInt(id, 10);
+
+      if (isNaN(todoId)) {
+        res.status(400).json({ error: "Invalid todo ID" });
+        return;
+      }
+
+      if (!content) {
+        res.status(400).json({ error: "Content is required" });
+        return;
+      }
+
+      // Todoが存在するかチェック
+      const todo = await prisma.todo.findUnique({
+        where: { id: todoId },
+      });
+
+      if (!todo) {
+        res.status(404).json({ error: "Todo not found" });
+        return;
+      }
+
+      // 最小限の実装：TodoのuserIdを使用
+      const comment = await prisma.comment.create({
+        data: {
+          content,
+          todoId,
+          userId: todo.userId,
+        },
+      });
+
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      res.status(500).json({ error: "Failed to create comment" });
+    }
+  }
+);
+
 export default router;
