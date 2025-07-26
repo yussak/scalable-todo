@@ -24,10 +24,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # AWS認証設定
-      # GitHub Secretsで以下を設定する必要がある
-      # - AWS_ACCESS_KEY_ID
-      # - AWS_SECRET_ACCESS_KEY
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -35,12 +31,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # ECRにログイン
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Backend Docker イメージをビルド・プッシュ
       - name: Build and push backend image
         run: |
           cd backend
@@ -49,7 +43,6 @@ jobs:
           echo "backend_image=$ECR_REGISTRY/$ECR_REPOSITORY:backend-latest" >> $GITHUB_OUTPUT
         id: build-backend
 
-      # Frontend Docker イメージをビルド・プッシュ
       - name: Build and push frontend image
         run: |
           cd frontend
@@ -58,7 +51,6 @@ jobs:
           echo "frontend_image=$ECR_REGISTRY/$ECR_REPOSITORY:frontend-latest" >> $GITHUB_OUTPUT
         id: build-frontend
 
-      # ECS Backend サービスを強制的に新しいデプロイメントで更新
       - name: Force new deployment for backend service
         run: |
           aws ecs update-service \
@@ -67,7 +59,6 @@ jobs:
             --force-new-deployment \
             --region $AWS_REGION
 
-      # ECS Frontend サービスを強制的に新しいデプロイメントで更新
       - name: Force new deployment for frontend service
         run: |
           aws ecs update-service \
@@ -76,7 +67,6 @@ jobs:
             --force-new-deployment \
             --region $AWS_REGION
 
-      # デプロイメント完了を待機
       - name: Wait for backend service deployment
         run: |
           aws ecs wait services-stable \
@@ -96,13 +86,3 @@ jobs:
           echo "✅ Deployment completed successfully!"
           echo "Backend image: ${{ steps.build-backend.outputs.backend_image }}"
           echo "Frontend image: ${{ steps.build-frontend.outputs.frontend_image }}"
-
-# 必要なGitHub Secrets設定:
-# 1. Repository Settings > Secrets and variables > Actions で以下を設定:
-#    - AWS_ACCESS_KEY_ID: AWSアクセスキーID
-#    - AWS_SECRET_ACCESS_KEY: AWSシークレットアクセスキー
-#
-# 2. IAMユーザーには以下の権限が必要:
-#    - AmazonEC2ContainerRegistryPowerUser
-#    - AmazonECS_FullAccess
-#    または、より制限的なカスタムポリシー
