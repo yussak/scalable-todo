@@ -47,3 +47,52 @@ describe("POST /api/todos/:todoId/comments", () => {
     expect(response.body.todoId).toBe(testTodo.id);
   });
 });
+
+describe("GET /api/todos/:todoId/comments", () => {
+  it("should return empty array when no comments exist", async () => {
+    const response = await request(app)
+      .get(`/api/todos/${testTodo.id}/comments`)
+      .expect(200);
+
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body).toHaveLength(0);
+  });
+
+  it("should return all comments for a todo with existing comments", async () => {
+    // Create comments
+    await request(app)
+      .post(`/api/todos/${testTodo.id}/comments`)
+      .send({ content: "First comment" })
+      .expect(201);
+
+    await request(app)
+      .post(`/api/todos/${testTodo.id}/comments`)
+      .send({ content: "Second comment" })
+      .expect(201);
+
+    const response = await request(app)
+      .get(`/api/todos/${testTodo.id}/comments`)
+      .expect(200);
+
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body).toHaveLength(2);
+    expect(response.body[0].content).toBe("Second comment"); // Most recent first
+    expect(response.body[1].content).toBe("First comment");
+  });
+
+  it("should return 404 for non-existent todo", async () => {
+    const response = await request(app)
+      .get("/api/todos/99999/comments")
+      .expect(404);
+
+    expect(response.body.error).toBe("Todo not found");
+  });
+
+  it("should return 400 for invalid todo ID", async () => {
+    const response = await request(app)
+      .get("/api/todos/invalid/comments")
+      .expect(400);
+
+    expect(response.body.error).toBe("Invalid todo ID");
+  });
+});

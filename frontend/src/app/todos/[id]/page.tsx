@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { CommentForm } from "@/app/components/CommentForm";
+import { CommentList } from "@/app/components/CommentList";
 
 interface Todo {
   id: number;
@@ -25,6 +26,7 @@ export default function TodoDetail({
   const [todo, setTodo] = useState<Todo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [commentRefresh, setCommentRefresh] = useState(0);
 
   useEffect(() => {
     if (authLoading) return;
@@ -143,7 +145,17 @@ export default function TodoDetail({
               <h3 className="text-lg font-semibold text-gray-800 mb-3">
                 新しいコメントを投稿
               </h3>
-              <CommentForm todoId={todo.id} onCommentAdd={() => {}} />
+              <CommentForm
+                todoId={todo.id}
+                onCommentAdd={() => setCommentRefresh((prev) => prev + 1)}
+              />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                コメント一覧
+              </h3>
+              <CommentList todoId={todo.id} refresh={commentRefresh} />
             </div>
           </div>
         </div>

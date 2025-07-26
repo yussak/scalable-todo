@@ -1,6 +1,30 @@
 import { Router, Request, Response } from "express";
 import prisma from "../prisma.js";
 
+// Helper function for todo ID validation and existence check
+async function validateAndGetTodo(
+  todoIdParam: string,
+  res: Response
+): Promise<{ todoId: number; todo: { id: number; userId: number } } | null> {
+  const todoId = parseInt(todoIdParam, 10);
+
+  if (isNaN(todoId)) {
+    res.status(400).json({ error: "Invalid todo ID" });
+    return null;
+  }
+
+  const todo = await prisma.todo.findUnique({
+    where: { id: todoId },
+  });
+
+  if (!todo) {
+    res.status(404).json({ error: "Todo not found" });
+    return null;
+  }
+
+  return { todoId, todo };
+}
+
 const router = Router();
 
 router.get("/", async (req: Request, res: Response): Promise<void> => {
@@ -148,7 +172,12 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
 
     res.json(updatedTodo);
   } catch (error: unknown) {
-    if (error.code === "P2025") {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2025"
+    ) {
       res.status(404).json({ error: "Todo not found" });
     } else {
       console.error("Error updating todo:", error);
@@ -191,7 +220,12 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
 
     res.json(remainingTodos);
   } catch (error: unknown) {
-    if (error.code === "P2025") {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2025"
+    ) {
       res.status(404).json({ error: "Todo not found" });
     } else {
       console.error("Error deleting todo:", error);
@@ -207,27 +241,18 @@ router.post(
     try {
       const { id } = req.params;
       const { content } = req.body;
-      const todoId = parseInt(id, 10);
-
-      if (isNaN(todoId)) {
-        res.status(400).json({ error: "Invalid todo ID" });
-        return;
-      }
 
       if (!content) {
         res.status(400).json({ error: "Content is required" });
         return;
       }
 
-      // Todoが存在するかチェック
-      const todo = await prisma.todo.findUnique({
-        where: { id: todoId },
-      });
-
-      if (!todo) {
-        res.status(404).json({ error: "Todo not found" });
-        return;
+      const validation = await validateAndGetTodo(id, res);
+      if (!validation) {
+        return; // Response already sent by validateAndGetTodo
       }
+
+      const { todoId, todo } = validation;
 
       // 最小限の実装：TodoのuserIdを使用
       const comment = await prisma.comment.create({
@@ -236,6 +261,7 @@ router.post(
           todoId,
           userId: todo.userId,
         },
+        include: { user: true },
       });
 
       res.status(201).json(comment);
@@ -249,7 +275,28 @@ router.post(
 router.get(
   "/:id/comments",
   async (req: Request, res: Response): Promise<void> => {
-    res.json([]);
+    try {
+      const { id } = req.params;
+
+      const validation = await validateAndGetTodo(id, res);
+      if (!validation) {
+        return; // Response already sent by validateAndGetTodo
+      }
+
+      const { todoId } = validation;
+
+      // コメントを取得
+      const comments = await prisma.comment.findMany({
+        where: { todoId },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+      });
+
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      res.status(500).json({ error: "Failed to fetch comments" });
+    }
   }
 );
 
