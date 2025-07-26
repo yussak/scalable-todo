@@ -234,7 +234,6 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// Comment routes
 router.post(
   "/:id/comments",
   async (req: Request, res: Response): Promise<void> => {
@@ -249,12 +248,11 @@ router.post(
 
       const validation = await validateAndGetTodo(id, res);
       if (!validation) {
-        return; // Response already sent by validateAndGetTodo
+        return;
       }
 
       const { todoId, todo } = validation;
 
-      // 最小限の実装：TodoのuserIdを使用
       const comment = await prisma.comment.create({
         data: {
           content,
@@ -280,12 +278,11 @@ router.get(
 
       const validation = await validateAndGetTodo(id, res);
       if (!validation) {
-        return; // Response already sent by validateAndGetTodo
+        return;
       }
 
       const { todoId } = validation;
 
-      // コメントを取得
       const comments = await prisma.comment.findMany({
         where: { todoId },
         include: { user: true },
@@ -308,7 +305,7 @@ router.delete(
 
       const validation = await validateAndGetTodo(id, res);
       if (!validation) {
-        return; // Response already sent by validateAndGetTodo
+        return;
       }
 
       const { todoId } = validation;
@@ -320,7 +317,6 @@ router.delete(
         return;
       }
 
-      // Commentの存在確認
       const comment = await prisma.comment.findFirst({
         where: {
           id: commentIdNum,
@@ -333,7 +329,6 @@ router.delete(
         return;
       }
 
-      // Commentを削除
       await prisma.comment.delete({
         where: { id: commentIdNum },
       });
