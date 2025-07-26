@@ -7,7 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface User {
   id: number;
@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   const login = (newToken: string, newUser: User) => {
     setToken(newToken);
@@ -73,6 +74,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
     setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (user == null && pathname !== "/login" && pathname !== "/register") {
+      router.push("/login");
+      return;
+    }
+
+    if (user != null && (pathname === "/login" || pathname === "/register")) {
+      router.push("/");
+      return;
+    }
+  }, [user, isLoading, pathname, router]);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
