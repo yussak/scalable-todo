@@ -147,7 +147,7 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
     });
 
     res.json(updatedTodo);
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.code === "P2025") {
       res.status(404).json({ error: "Todo not found" });
     } else {
@@ -190,7 +190,7 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
     });
 
     res.json(remainingTodos);
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.code === "P2025") {
       res.status(404).json({ error: "Todo not found" });
     } else {
@@ -243,6 +243,13 @@ router.post(
       console.error("Error creating comment:", error);
       res.status(500).json({ error: "Failed to create comment" });
     }
+  }
+);
+
+router.get(
+  "/:id/comments",
+  async (req: Request, res: Response): Promise<void> => {
+    res.json([]);
   }
 );
 
