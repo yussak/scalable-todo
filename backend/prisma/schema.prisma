@@ -24,6 +24,7 @@ model Todo {
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   reactions   Reaction[]
+  comments    Comment[]
 
   @@map("todos")
 }
@@ -37,6 +38,7 @@ model User {
 
   todos     Todo[]
   reactions Reaction[]
+  comments  Comment[]
 
   @@map("users")
 }
@@ -53,4 +55,18 @@ model Reaction {
 
   @@unique([todoId, userId, emoji])
   @@map("reactions")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  todoId    Int      @map("todo_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
 }
