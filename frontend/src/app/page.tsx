@@ -139,6 +139,55 @@ export default function Home() {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [editingId]);
 
+  const renderEditForm = (todo: Todo) => (
+    <div className="space-y-4">
+      <input
+        type="text"
+        value={editTitle}
+        onChange={(e) => setEditTitle(e.target.value)}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+        placeholder="タイトル"
+        autoFocus
+      />
+      <textarea
+        value={editDescription}
+        onChange={(e) => setEditDescription(e.target.value)}
+        rows={3}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+        placeholder="説明"
+      />
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id={`completed-${todo.id}`}
+          checked={editCompleted}
+          onChange={(e) => setEditCompleted(e.target.checked)}
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label
+          htmlFor={`completed-${todo.id}`}
+          className="text-sm text-gray-700"
+        >
+          完了済み
+        </label>
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={() => updateTodo(todo.id)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          保存
+        </button>
+        <button
+          onClick={cancelEdit}
+          className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        >
+          キャンセル
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
@@ -160,55 +209,8 @@ export default function Home() {
             todos.map((todo) => (
               <div key={todo.id} className="bg-white rounded-lg shadow-md p-6">
                 {editingId === todo.id ? (
-                  // 編集モード
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                      placeholder="タイトル"
-                      autoFocus
-                    />
-                    <textarea
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                      placeholder="説明"
-                    />
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id={`completed-${todo.id}`}
-                        checked={editCompleted}
-                        onChange={(e) => setEditCompleted(e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor={`completed-${todo.id}`}
-                        className="text-sm text-gray-700"
-                      >
-                        完了済み
-                      </label>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => updateTodo(todo.id)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        保存
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                      >
-                        キャンセル
-                      </button>
-                    </div>
-                  </div>
+                  renderEditForm(todo)
                 ) : (
-                  // 表示モード
                   <TodoItem
                     todo={todo}
                     onEdit={startEdit}
