@@ -283,7 +283,7 @@ describe("TodosController", () => {
 
   describe("createTodo", () => {
     it("should return 400 when title is not provided", async () => {
-      mockRequest.body = { userId: "1" };
+      mockRequest.body = { userId: 1 };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -295,7 +295,7 @@ describe("TodosController", () => {
     });
 
     it("should return 400 when title is empty string", async () => {
-      mockRequest.body = { title: "", userId: "1" };
+      mockRequest.body = { title: "", userId: 1 };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -307,7 +307,7 @@ describe("TodosController", () => {
     });
 
     it("should return 400 when title is only whitespace", async () => {
-      mockRequest.body = { title: "   ", userId: "1" };
+      mockRequest.body = { title: "   ", userId: 1 };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -330,8 +330,8 @@ describe("TodosController", () => {
       expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
-    it("should return 400 when userId is not a string", async () => {
-      mockRequest.body = { title: "Test Todo", userId: 123 };
+    it("should return 400 when userId is not a number", async () => {
+      mockRequest.body = { title: "Test Todo", userId: "123" };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -342,8 +342,8 @@ describe("TodosController", () => {
       expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
-    it("should return 400 when userId is empty string", async () => {
-      mockRequest.body = { title: "Test Todo", userId: "" };
+    it("should return 400 when userId is null", async () => {
+      mockRequest.body = { title: "Test Todo", userId: null };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -354,19 +354,7 @@ describe("TodosController", () => {
       expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
-    it("should return 400 when userId is only whitespace", async () => {
-      mockRequest.body = { title: "Test Todo", userId: "   " };
-
-      await todosController.createTodo(
-        mockRequest as Request,
-        mockResponse as Response
-      );
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
-    });
-
-    it("should return 400 when userId is not a valid number", async () => {
+    it("should return 400 when userId is a string", async () => {
       mockRequest.body = { title: "Test Todo", userId: "invalid" };
 
       await todosController.createTodo(
@@ -375,7 +363,7 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid userId" });
+      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
     it("should create todo successfully with title and userId", async () => {
@@ -394,7 +382,7 @@ describe("TodosController", () => {
       };
 
       (prisma.todo.create as any).mockResolvedValue(mockCreatedTodo);
-      mockRequest.body = { title: "Test Todo", userId: "1" };
+      mockRequest.body = { title: "Test Todo", userId: 1 };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -432,7 +420,7 @@ describe("TodosController", () => {
       mockRequest.body = {
         title: "Test Todo",
         description: "Test Description",
-        userId: "1",
+        userId: 1,
       };
 
       await todosController.createTodo(
@@ -456,7 +444,7 @@ describe("TodosController", () => {
       (prisma.todo.create as any).mockRejectedValue(
         new Error("Database error")
       );
-      mockRequest.body = { title: "Test Todo", userId: "1" };
+      mockRequest.body = { title: "Test Todo", userId: 1 };
 
       await todosController.createTodo(
         mockRequest as Request,
