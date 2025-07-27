@@ -98,27 +98,17 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (
-      userId == null ||
-      typeof userId !== "string" ||
-      userId.trim().length === 0
-    ) {
+    if (userId == null || typeof userId !== "number") {
       res.status(400).json({ error: "userId is required" });
       return;
     }
 
-    const userIdNum = parseInt(userId, 10);
-    if (isNaN(userIdNum)) {
-      res.status(400).json({ error: "Invalid userId" });
-      return;
-    }
-
     await prisma.todo.delete({
-      where: { id: todoId, userId: userIdNum },
+      where: { id: todoId, userId: userId },
     });
 
     const remainingTodos = await prisma.todo.findMany({
-      where: { userId: userIdNum },
+      where: { userId: userId },
       include: { user: true },
       orderBy: { createdAt: "desc" },
     });
