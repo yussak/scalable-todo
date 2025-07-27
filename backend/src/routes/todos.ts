@@ -9,7 +9,6 @@ async function validateAndGetTodo(
   const todoId = parseInt(todoIdParam, 10);
 
   if (isNaN(todoId)) {
-    res.status(400).json({ error: "Invalid todo ID" });
     return null;
   }
 
@@ -18,7 +17,6 @@ async function validateAndGetTodo(
   });
 
   if (todo == null) {
-    res.status(404).json({ error: "Todo not found" });
     return null;
   }
 
@@ -31,7 +29,11 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.query;
 
-    if (userId == null || userId.trim().length === 0) {
+    if (
+      userId == null ||
+      typeof userId !== "string" ||
+      userId.trim().length === 0
+    ) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -59,7 +61,11 @@ router.get("/:id", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { userId } = req.query;
 
-    if (userId == null || userId.trim().length === 0) {
+    if (
+      userId == null ||
+      typeof userId !== "string" ||
+      userId.trim().length === 0
+    ) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -106,7 +112,11 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (userId == null || userId.trim().length === 0) {
+    if (
+      userId == null ||
+      typeof userId !== "string" ||
+      userId.trim().length === 0
+    ) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -149,7 +159,11 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (userId == null || userId.trim().length === 0) {
+    if (
+      userId == null ||
+      typeof userId !== "string" ||
+      userId.trim().length === 0
+    ) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -197,7 +211,11 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (userId == null || userId.trim().length === 0) {
+    if (
+      userId == null ||
+      typeof userId !== "string" ||
+      userId.trim().length === 0
+    ) {
       res.status(400).json({ error: "userId is required" });
       return;
     }
@@ -248,6 +266,7 @@ router.post(
 
       const validation = await validateAndGetTodo(id, res);
       if (validation == null) {
+        res.status(400).json({ error: "Invalid todo ID or todo not found" });
         return;
       }
 
@@ -278,6 +297,7 @@ router.get(
 
       const validation = await validateAndGetTodo(id, res);
       if (validation == null) {
+        res.status(400).json({ error: "Invalid todo ID or todo not found" });
         return;
       }
 
@@ -305,6 +325,7 @@ router.delete(
 
       const validation = await validateAndGetTodo(id, res);
       if (validation == null) {
+        res.status(400).json({ error: "Invalid todo ID or todo not found" });
         return;
       }
 
