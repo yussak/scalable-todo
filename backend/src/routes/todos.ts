@@ -35,45 +35,9 @@ router.get("/:id", (req: Request, res: Response) =>
   todosController.getTodoById(req, res)
 );
 
-router.post("/", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { title, description, userId } = req.body;
-
-    if (title == null || title.trim().length === 0) {
-      res.status(400).json({ error: "Title is required" });
-      return;
-    }
-
-    if (
-      userId == null ||
-      typeof userId !== "string" ||
-      userId.trim().length === 0
-    ) {
-      res.status(400).json({ error: "userId is required" });
-      return;
-    }
-
-    const userIdNum = parseInt(userId, 10);
-    if (isNaN(userIdNum)) {
-      res.status(400).json({ error: "Invalid userId" });
-      return;
-    }
-
-    const todo = await prisma.todo.create({
-      data: {
-        title,
-        description: description || null,
-        userId: userIdNum,
-      },
-      include: { user: true },
-    });
-
-    res.status(201).json(todo);
-  } catch (error) {
-    console.error("Error creating todo:", error);
-    res.status(500).json({ error: "Failed to create todo" });
-  }
-});
+router.post("/", (req: Request, res: Response) =>
+  todosController.createTodo(req, res)
+);
 
 router.put("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
