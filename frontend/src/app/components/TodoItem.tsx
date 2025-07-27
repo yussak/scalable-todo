@@ -1,15 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ReactionPicker } from "./ReactionPicker";
-
-interface Reaction {
-  id: number;
-  todoId: number;
-  userId: number;
-  emoji: string;
-  createdAt: string;
-}
 
 interface Todo {
   id: number;
@@ -23,24 +14,15 @@ interface Todo {
     id: number;
     email: string;
   };
-  reactions?: Reaction[];
 }
 
 interface TodoItemProps {
   todo: Todo;
   onEdit: (todo: Todo) => void;
   onDelete: (id: number) => void;
-  onReactionAdd: (todoId: number, emoji: string) => void;
-  onReactionRemove: (todoId: number, emoji: string) => void;
 }
 
-export default function TodoItem({
-  todo,
-  onEdit,
-  onDelete,
-  onReactionAdd,
-  onReactionRemove,
-}: TodoItemProps) {
+export default function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
   return (
     <>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{todo.title}</h3>
@@ -79,35 +61,8 @@ export default function TodoItem({
           >
             削除
           </button>
-          <ReactionPicker
-            todoId={todo.id}
-            onReactionAdd={(emoji) => onReactionAdd(todo.id, emoji)}
-          />
         </div>
       </div>
-      {/* リアクション表示 */}
-      {todo.reactions && todo.reactions.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {Object.entries(
-            todo.reactions.reduce(
-              (acc, reaction) => {
-                acc[reaction.emoji] = (acc[reaction.emoji] || 0) + 1;
-                return acc;
-              },
-              {} as Record<string, number>
-            )
-          ).map(([emoji, count]) => (
-            <button
-              key={emoji}
-              onClick={() => onReactionRemove(todo.id, emoji)}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-pointer"
-            >
-              <span>{emoji}</span>
-              <span className="text-gray-600">{count}</span>
-            </button>
-          ))}
-        </div>
-      )}
     </>
   );
 }

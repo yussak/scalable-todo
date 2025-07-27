@@ -6,14 +6,6 @@ import TodoForm from "./components/TodoForm";
 import TodoItem from "./components/TodoItem";
 import api from "@/lib/api";
 
-interface Reaction {
-  id: number;
-  todoId: number;
-  userId: number;
-  emoji: string;
-  createdAt: string;
-}
-
 interface Todo {
   id: number;
   title: string;
@@ -26,7 +18,6 @@ interface Todo {
     id: number;
     email: string;
   };
-  reactions?: Reaction[];
 }
 
 export default function Home() {
@@ -48,28 +39,7 @@ export default function Home() {
       if (response.ok) {
         const todos = await response.json();
 
-        // 各Todoのリアクションを取得
-        const todosWithReactions = await Promise.all(
-          todos.map(async (todo: Todo) => {
-            try {
-              const reactionsResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/todos/${todo.id}/reactions`
-              );
-              if (reactionsResponse.ok) {
-                const reactions = await reactionsResponse.json();
-                return { ...todo, reactions };
-              }
-            } catch (error) {
-              console.error(
-                `Failed to fetch reactions for todo ${todo.id}:`,
-                error
-              );
-            }
-            return todo;
-          })
-        );
-
-        setTodos(todosWithReactions);
+        setTodos(todos);
       }
     } catch (error) {
       console.error("Failed to fetch todos:", error);
@@ -149,70 +119,6 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Failed to update todo:", error);
-    }
-  };
-
-  const addReaction = async (todoId: number, emoji: string) => {
-    if (!user?.id) return;
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/todos/${todoId}/reactions`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ emoji }),
-        }
-      );
-
-      if (response.ok) {
-        // リアクション一覧を更新
-        console.log("Reaction added successfully:", emoji);
-        fetchTodos();
-      } else {
-        console.error(
-          "Failed to add reaction:",
-          response.status,
-          response.statusText
-        );
-      }
-    } catch (error) {
-      console.error("Failed to add reaction:", error);
-    }
-  };
-
-  const removeReaction = async (todoId: number, emoji: string) => {
-    if (!user?.id) return;
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/todos/${todoId}/reactions`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ emoji }),
-        }
-      );
-
-      if (response.ok) {
-        // リアクション一覧を更新
-        console.log("Reaction removed successfully:", emoji);
-        fetchTodos();
-      } else {
-        console.error(
-          "Failed to remove reaction:",
-          response.status,
-          response.statusText
-        );
-      }
-    } catch (error) {
-      console.error("Failed to remove reaction:", error);
     }
   };
 
@@ -307,8 +213,6 @@ export default function Home() {
                     todo={todo}
                     onEdit={startEdit}
                     onDelete={deleteTodo}
-                    onReactionAdd={addReaction}
-                    onReactionRemove={removeReaction}
                   />
                 )}
               </div>
