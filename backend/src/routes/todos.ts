@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import prisma from "../prisma.js";
+import { TodosController } from "../controllers/todosController.js";
 
 // Helper function for todo ID validation and existence check
 async function validateAndGetTodo(
@@ -24,37 +25,11 @@ async function validateAndGetTodo(
 }
 
 const router = Router();
+const todosController = new TodosController();
 
-router.get("/", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { userId } = req.query;
-
-    if (
-      userId == null ||
-      typeof userId !== "string" ||
-      userId.trim().length === 0
-    ) {
-      res.status(400).json({ error: "userId is required" });
-      return;
-    }
-
-    const userIdNum = parseInt(userId as string, 10);
-    if (isNaN(userIdNum)) {
-      res.status(400).json({ error: "Invalid userId" });
-      return;
-    }
-
-    const todos = await prisma.todo.findMany({
-      where: { userId: userIdNum },
-      include: { user: true },
-      orderBy: { createdAt: "desc" },
-    });
-    res.json(todos);
-  } catch (error) {
-    console.error("Error fetching todos:", error);
-    res.status(500).json({ error: "Failed to fetch todos" });
-  }
-});
+router.get("/", (req: Request, res: Response) =>
+  todosController.getTodos(req, res)
+);
 
 router.get("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
