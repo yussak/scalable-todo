@@ -45,7 +45,9 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must be a string",
+      });
     });
 
     it("should return 400 when userId is empty string", async () => {
@@ -58,6 +60,20 @@ describe("TodosController", () => {
 
       expect(statusMock).toHaveBeenCalledWith(400);
       expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+    });
+
+    it("should return 400 when userId is not a string", async () => {
+      mockRequest.query = { userId: 123 };
+
+      await todosController.getTodos(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must be a string",
+      });
     });
 
     it("should return 400 when userId is not a valid number", async () => {

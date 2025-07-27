@@ -6,12 +6,18 @@ export class TodosController {
     try {
       const { userId } = req.query;
 
-      if (
-        userId == null ||
-        typeof userId !== "string" ||
-        userId.trim().length === 0
-      ) {
+      if (userId == null) {
         res.status(400).json({ error: "userId is required" });
+        return;
+      }
+
+      if (typeof userId !== "string") {
+        res.status(400).json({ error: "userId must be a string" });
+        return;
+      }
+
+      if (userId.trim().length === 0) {
+        res.status(400).json({ error: "userId must not be empty" });
         return;
       }
 
