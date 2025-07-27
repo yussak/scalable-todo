@@ -12,10 +12,12 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editCompleted, setEditCompleted] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<{
+    id: number;
+    title: string;
+    description: string;
+    completed: boolean;
+  } | null>(null);
   const { user } = useAuth();
 
   const fetchTodos = useCallback(async () => {
@@ -75,27 +77,26 @@ export default function Home() {
   };
 
   const startEdit = (todo: Todo) => {
-    setEditingId(todo.id);
-    setEditTitle(todo.title);
-    setEditDescription(todo.description || "");
-    setEditCompleted(todo.completed);
+    setEditingTodo({
+      id: todo.id,
+      title: todo.title,
+      description: todo.description || "",
+      completed: todo.completed,
+    });
   };
 
   const cancelEdit = () => {
-    setEditingId(null);
-    setEditTitle("");
-    setEditDescription("");
-    setEditCompleted(false);
+    setEditingTodo(null);
   };
 
   const updateTodo = async (id: number) => {
-    if (!editTitle.trim() || !user?.id) return;
+    if (!editingTodo?.title.trim() || !user?.id) return;
 
     try {
       const response = await api.put(`/todos/${id}`, {
-        title: editTitle.trim(),
-        description: editDescription.trim() || null,
-        completed: editCompleted,
+        title: editingTodo.title.trim(),
+        description: editingTodo.description.trim() || null,
+        completed: editingTodo.completed,
         userId: user.id,
       });
 
@@ -117,28 +118,36 @@ export default function Home() {
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && editingId !== null) {
+      if (e.key === "Escape" && editingTodo !== null) {
         cancelEdit();
       }
     };
 
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [editingId]);
+  }, [editingTodo]);
 
   const renderEditForm = (todo: Todo) => (
     <div className="space-y-4">
       <input
         type="text"
-        value={editTitle}
-        onChange={(e) => setEditTitle(e.target.value)}
+        value={editingTodo?.title || ""}
+        onChange={(e) =>
+          setEditingTodo((prev) =>
+            prev ? { ...prev, title: e.target.value } : null
+          )
+        }
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
         placeholder="タイトル"
         autoFocus
       />
       <textarea
-        value={editDescription}
-        onChange={(e) => setEditDescription(e.target.value)}
+        value={editingTodo?.description || ""}
+        onChange={(e) =>
+          setEditingTodo((prev) =>
+            prev ? { ...prev, description: e.target.value } : null
+          )
+        }
         rows={3}
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
         placeholder="説明"
@@ -147,8 +156,12 @@ export default function Home() {
         <input
           type="checkbox"
           id={`completed-${todo.id}`}
-          checked={editCompleted}
-          onChange={(e) => setEditCompleted(e.target.checked)}
+          checked={editingTodo?.completed || false}
+          onChange={(e) =>
+            setEditingTodo((prev) =>
+              prev ? { ...prev, completed: e.target.checked } : null
+            )
+          }
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label
@@ -195,7 +208,7 @@ export default function Home() {
           ) : (
             todos.map((todo) => (
               <div key={todo.id} className="bg-white rounded-lg shadow-md p-6">
-                {editingId === todo.id ? (
+                {editingTodo?.id === todo.id ? (
                   renderEditForm(todo)
                 ) : (
                   <TodoItem
