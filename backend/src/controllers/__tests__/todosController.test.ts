@@ -7,6 +7,7 @@ vi.mock("../../prisma", () => ({
   default: {
     todo: {
       findMany: vi.fn(),
+      findFirst: vi.fn(),
     },
   },
 }));
@@ -25,6 +26,7 @@ describe("TodosController", () => {
 
     mockRequest = {
       query: {},
+      params: {},
     };
 
     mockResponse = {
@@ -46,7 +48,7 @@ describe("TodosController", () => {
 
       expect(statusMock).toHaveBeenCalledWith(400);
       expect(jsonMock).toHaveBeenCalledWith({
-        error: "userId must be a string",
+        error: "userId is required",
       });
     });
 
@@ -59,7 +61,9 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must not be empty",
+      });
     });
 
     it("should return 400 when userId is not a string", async () => {
@@ -134,6 +138,144 @@ describe("TodosController", () => {
 
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to fetch todos" });
+    });
+  });
+
+  describe("getTodoById", () => {
+    it("should return 400 when userId is not provided", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.query = {};
+
+      await todosController.getTodoById(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+    });
+
+    it("should return 400 when userId is empty string", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.query = { userId: "" };
+
+      await todosController.getTodoById(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+    });
+
+    it("should return 400 when userId is not a string", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.query = { userId: 123 };
+
+      await todosController.getTodoById(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+    });
+
+    it("should return 400 when todo ID is invalid", async () => {
+      mockRequest.params = { id: "invalid" };
+      mockRequest.query = { userId: "1" };
+
+      await todosController.getTodoById(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid todo ID" });
+    });
+
+    it("should return 400 when userId is invalid", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.query = { userId: "invalid" };
+
+      await todosController.getTodoById(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid userId" });
+    });
+
+    it("should return 404 when todo is not found", async () => {
+      (prisma.todo.findFirst as any).mockResolvedValue(null);
+      mockRequest.params = { id: "1" };
+      mockRequest.query = { userId: "1" };
+
+      await todosController.getTodoById(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 1,
+          userId: 1,
+        },
+        include: { user: true },
+      });
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Todo not found" });
+    });
+
+    it("should return todo when valid ID and userId are provided", async () => {
+      const mockTodo = {
+        id: 1,
+        title: "Test Todo",
+        description: "Test Description",
+        completed: false,
+        userId: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        user: {
+          id: 1,
+          email: "test@example.com",
+        },
+      };
+
+      (prisma.todo.findFirst as any).mockResolvedValue(mockTodo);
+      mockRequest.params = { id: "1" };
+      mockRequest.query = { userId: "1" };
+
+      await todosController.getTodoById(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 1,
+          userId: 1,
+        },
+        include: { user: true },
+      });
+      expect(jsonMock).toHaveBeenCalledWith(mockTodo);
+    });
+
+    it("should return 500 when database error occurs", async () => {
+      (prisma.todo.findFirst as any).mockRejectedValue(
+        new Error("Database error")
+      );
+      mockRequest.params = { id: "1" };
+      mockRequest.query = { userId: "1" };
+
+      await todosController.getTodoById(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to fetch todo" });
     });
   });
 });
