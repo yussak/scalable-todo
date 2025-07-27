@@ -5,20 +5,7 @@ import { useAuth } from "./contexts/AuthContext";
 import TodoForm from "./components/TodoForm";
 import TodoItem from "./components/TodoItem";
 import api from "@/lib/api";
-
-interface Todo {
-  id: number;
-  title: string;
-  description: string | null;
-  completed: boolean;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-  user?: {
-    id: number;
-    email: string;
-  };
-}
+import { Todo } from "@/types/todo";
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
