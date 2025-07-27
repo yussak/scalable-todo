@@ -19,13 +19,14 @@ const api = {
   },
 
   // TODO: CIビルドを通すため一時的に無視、後で正しく修正
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   put(url: string, data?: any): Promise<Response> {
     return fetch(`${BASE_URL}${url}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
+      body: data ? JSON.stringify(data) : undefined,
     });
   },
 

@@ -91,23 +91,14 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (
-      userId == null ||
-      typeof userId !== "string" ||
-      userId.trim().length === 0
-    ) {
+    // todo:他のところもintのままで良さそうなので確認
+    if (userId == null || typeof userId !== "number") {
       res.status(400).json({ error: "userId is required" });
       return;
     }
 
-    const userIdNum = parseInt(userId, 10);
-    if (isNaN(userIdNum)) {
-      res.status(400).json({ error: "Invalid userId" });
-      return;
-    }
-
     const updatedTodo = await prisma.todo.update({
-      where: { id: todoId, userId: userIdNum },
+      where: { id: todoId, userId: userId },
       data: {
         title: title.trim(),
         description: description !== undefined ? description : undefined,
