@@ -61,7 +61,15 @@ export default function TodoDetail({
         const todoData = await response.json();
         setTodo(todoData);
       } catch (err) {
-        setError("エラーが発生しました。");
+        // スタンダードなエラーハンドリングらしい
+        console.error("Todo fetch error:", err);
+        if (process.env.NODE_ENV === "development") {
+          setError(String(err));
+        } else {
+          setError(
+            "通信エラーが発生しました。しばらくしてから再度お試しください。"
+          );
+        }
       } finally {
         setLoading(false);
       }
