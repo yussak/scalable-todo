@@ -1,7 +1,15 @@
 import { Request, Response } from "express";
 import prisma from "../prisma.js";
+import { TodoModel, ITodoModel } from "../models/todoModel.js";
 
 export class TodosController {
+  private todoModel: ITodoModel;
+
+  // 依存性注入パターンでTodoModelを受け取る
+  constructor(todoModel?: ITodoModel) {
+    this.todoModel = todoModel ?? new TodoModel();
+  }
+
   async getTodos(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.query;
@@ -27,11 +35,8 @@ export class TodosController {
         return;
       }
 
-      const todos = await prisma.todo.findMany({
-        where: { userId: userIdNum },
-        include: { user: true },
-        orderBy: { createdAt: "desc" },
-      });
+      const todos = await this.todoModel.getTodosByUserId(userIdNum);
+
       res.json(todos);
     } catch (error) {
       console.error("Error fetching todos:", error);

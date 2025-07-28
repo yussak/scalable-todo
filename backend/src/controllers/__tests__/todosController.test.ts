@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Request, Response } from "express";
 import { TodosController } from "../todosController";
+import { TodoModel } from "../../models/todoModel";
 import prisma from "../../prisma";
+
+vi.mock("../../models/todoModel", () => ({
+  TodoModel: vi.fn().mockImplementation(() => ({
+    getTodosByUserId: vi.fn(),
+  })),
+}));
 
 vi.mock("../../prisma", () => ({
   default: {
@@ -28,8 +35,14 @@ describe("TodosController", () => {
   let mockResponse: Partial<Response>;
   let jsonMock: any;
   let statusMock: any;
+  let mockTodoModel: any;
 
   beforeEach(() => {
+    mockTodoModel = {
+      getTodosByUserId: vi.fn(),
+    };
+    (TodoModel as any).mockImplementation(() => mockTodoModel);
+
     todosController = new TodosController();
     jsonMock = vi.fn();
     statusMock = vi.fn().mockReturnThis();
@@ -120,7 +133,7 @@ describe("TodosController", () => {
         },
       ];
 
-      (prisma.todo.findMany as any).mockResolvedValue(mockTodos);
+      mockTodoModel.getTodosByUserId.mockResolvedValue(mockTodos);
       mockRequest.query = { userId: "1" };
 
       await todosController.getTodos(
@@ -128,16 +141,12 @@ describe("TodosController", () => {
         mockResponse as Response
       );
 
-      expect(prisma.todo.findMany).toHaveBeenCalledWith({
-        where: { userId: 1 },
-        include: { user: true },
-        orderBy: { createdAt: "desc" },
-      });
+      expect(mockTodoModel.getTodosByUserId).toHaveBeenCalledWith(1);
       expect(jsonMock).toHaveBeenCalledWith(mockTodos);
     });
 
     it("should return 500 when database error occurs", async () => {
-      (prisma.todo.findMany as any).mockRejectedValue(
+      mockTodoModel.getTodosByUserId.mockRejectedValue(
         new Error("Database error")
       );
       mockRequest.query = { userId: "1" };
