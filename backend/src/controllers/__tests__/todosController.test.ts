@@ -16,6 +16,8 @@ vi.mock("../../prisma", () => ({
     comment: {
       create: vi.fn(),
       findMany: vi.fn(),
+      findFirst: vi.fn(),
+      delete: vi.fn(),
     },
   },
 }));
@@ -1046,6 +1048,163 @@ describe("TodosController", () => {
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({
         error: "Failed to fetch comments",
+      });
+    });
+  });
+
+  describe("deleteComment", () => {
+    let sendMock: any;
+
+    beforeEach(() => {
+      sendMock = vi.fn();
+      mockResponse.send = sendMock;
+    });
+
+    it("should return 400 when todo ID is invalid", async () => {
+      mockRequest.params = { id: "invalid", commentId: "1" };
+
+      await todosController.deleteComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Invalid todo ID or todo not found",
+      });
+    });
+
+    it("should return 400 when todo not found", async () => {
+      (prisma.todo.findUnique as any).mockResolvedValue(null);
+      mockRequest.params = { id: "1", commentId: "1" };
+
+      await todosController.deleteComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Invalid todo ID or todo not found",
+      });
+    });
+
+    it("should return 400 when comment ID is invalid", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      mockRequest.params = { id: "1", commentId: "invalid" };
+
+      await todosController.deleteComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid comment ID" });
+    });
+
+    it("should return 404 when comment not found", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      (prisma.comment.findFirst as any).mockResolvedValue(null);
+
+      mockRequest.params = { id: "1", commentId: "1" };
+
+      await todosController.deleteComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.comment.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 1,
+          todoId: 1,
+        },
+      });
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Comment not found" });
+    });
+
+    it("should delete comment successfully", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      const mockComment = {
+        id: 1,
+        content: "Test comment",
+        todoId: 1,
+        userId: 2,
+      };
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      (prisma.comment.findFirst as any).mockResolvedValue(mockComment);
+      (prisma.comment.delete as any).mockResolvedValue(mockComment);
+
+      mockRequest.params = { id: "1", commentId: "1" };
+
+      await todosController.deleteComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(prisma.comment.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 1,
+          todoId: 1,
+        },
+      });
+      expect(prisma.comment.delete).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(statusMock).toHaveBeenCalledWith(204);
+      expect(sendMock).toHaveBeenCalled();
+    });
+
+    it("should return 500 when database error occurs", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      const mockComment = {
+        id: 1,
+        content: "Test comment",
+        todoId: 1,
+        userId: 2,
+      };
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      (prisma.comment.findFirst as any).mockResolvedValue(mockComment);
+      (prisma.comment.delete as any).mockRejectedValue(
+        new Error("Database error")
+      );
+
+      mockRequest.params = { id: "1", commentId: "1" };
+
+      await todosController.deleteComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Failed to delete comment",
       });
     });
   });

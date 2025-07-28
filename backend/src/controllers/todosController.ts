@@ -279,4 +279,53 @@ export class TodosController {
       res.status(500).json({ error: "Failed to fetch comments" });
     }
   }
+
+  async deleteComment(req: Request, res: Response): Promise<void> {
+    try {
+      const { id, commentId } = req.params;
+
+      const todoId = parseInt(id, 10);
+
+      if (isNaN(todoId)) {
+        res.status(400).json({ error: "Invalid todo ID or todo not found" });
+        return;
+      }
+
+      const todo = await prisma.todo.findUnique({
+        where: { id: todoId },
+      });
+
+      if (todo == null) {
+        res.status(400).json({ error: "Invalid todo ID or todo not found" });
+        return;
+      }
+
+      const commentIdNum = parseInt(commentId, 10);
+      if (isNaN(commentIdNum)) {
+        res.status(400).json({ error: "Invalid comment ID" });
+        return;
+      }
+
+      const comment = await prisma.comment.findFirst({
+        where: {
+          id: commentIdNum,
+          todoId,
+        },
+      });
+
+      if (comment == null) {
+        res.status(404).json({ error: "Comment not found" });
+        return;
+      }
+
+      await prisma.comment.delete({
+        where: { id: commentIdNum },
+      });
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).json({ error: "Failed to delete comment" });
+    }
+  }
 }
