@@ -9,6 +9,7 @@ vi.mock("../../prisma", () => ({
       findMany: vi.fn(),
       findFirst: vi.fn(),
       create: vi.fn(),
+      update: vi.fn(),
     },
   },
 }));
@@ -453,6 +454,199 @@ describe("TodosController", () => {
 
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to create todo" });
+    });
+  });
+
+  describe("updateTodo", () => {
+    it("should return 400 when todo ID is invalid", async () => {
+      mockRequest.params = { id: "invalid" };
+      mockRequest.body = { title: "Updated Todo", userId: 1 };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid todo ID" });
+    });
+
+    it("should return 400 when title is not provided", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { userId: 1 };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
+    });
+
+    it("should return 400 when title is empty string", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { title: "", userId: 1 };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
+    });
+
+    it("should return 400 when title is only whitespace", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { title: "   ", userId: 1 };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
+    });
+
+    it("should return 400 when userId is not provided", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { title: "Updated Todo" };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+    });
+
+    it("should return 400 when userId is not a number", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { title: "Updated Todo", userId: "123" };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+    });
+
+    it("should update todo successfully with all fields", async () => {
+      const mockUpdatedTodo = {
+        id: 1,
+        title: "Updated Todo",
+        description: "Updated Description",
+        completed: true,
+        userId: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        user: {
+          id: 1,
+          email: "test@example.com",
+        },
+      };
+
+      (prisma.todo.update as any).mockResolvedValue(mockUpdatedTodo);
+      mockRequest.params = { id: "1" };
+      mockRequest.body = {
+        title: "Updated Todo",
+        description: "Updated Description",
+        completed: true,
+        userId: 1,
+      };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.update).toHaveBeenCalledWith({
+        where: { id: 1, userId: 1 },
+        data: {
+          title: "Updated Todo",
+          description: "Updated Description",
+          completed: true,
+        },
+        include: { user: true },
+      });
+      expect(jsonMock).toHaveBeenCalledWith(mockUpdatedTodo);
+    });
+
+    it("should update todo successfully with only title", async () => {
+      const mockUpdatedTodo = {
+        id: 1,
+        title: "Updated Todo",
+        description: null,
+        completed: false,
+        userId: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        user: {
+          id: 1,
+          email: "test@example.com",
+        },
+      };
+
+      (prisma.todo.update as any).mockResolvedValue(mockUpdatedTodo);
+      mockRequest.params = { id: "1" };
+      mockRequest.body = {
+        title: "Updated Todo",
+        userId: 1,
+      };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.update).toHaveBeenCalledWith({
+        where: { id: 1, userId: 1 },
+        data: {
+          title: "Updated Todo",
+          description: undefined,
+          completed: undefined,
+        },
+        include: { user: true },
+      });
+      expect(jsonMock).toHaveBeenCalledWith(mockUpdatedTodo);
+    });
+
+    it("should return 404 when todo not found", async () => {
+      const prismaError = new Error("Todo not found");
+      (prismaError as any).code = "P2025";
+      (prisma.todo.update as any).mockRejectedValue(prismaError);
+
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { title: "Updated Todo", userId: 1 };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Todo not found" });
+    });
+
+    it("should return 500 when database error occurs", async () => {
+      (prisma.todo.update as any).mockRejectedValue(
+        new Error("Database error")
+      );
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { title: "Updated Todo", userId: 1 };
+
+      await todosController.updateTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to update todo" });
     });
   });
 });

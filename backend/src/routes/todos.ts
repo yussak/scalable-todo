@@ -39,53 +39,9 @@ router.post("/", (req: Request, res: Response) =>
   todosController.createTodo(req, res)
 );
 
-router.put("/:id", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const { title, description, completed, userId } = req.body;
-    const todoId = parseInt(id, 10);
-
-    if (isNaN(todoId)) {
-      res.status(400).json({ error: "Invalid todo ID" });
-      return;
-    }
-
-    if (title == null || title.trim().length === 0) {
-      res.status(400).json({ error: "Title is required" });
-      return;
-    }
-
-    // todo:他のところもintのままで良さそうなので確認
-    if (userId == null || typeof userId !== "number") {
-      res.status(400).json({ error: "userId is required" });
-      return;
-    }
-
-    const updatedTodo = await prisma.todo.update({
-      where: { id: todoId, userId: userId },
-      data: {
-        title: title.trim(),
-        description: description !== undefined ? description : undefined,
-        completed: completed !== undefined ? completed : undefined,
-      },
-      include: { user: true },
-    });
-
-    res.json(updatedTodo);
-  } catch (error: unknown) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "P2025"
-    ) {
-      res.status(404).json({ error: "Todo not found" });
-    } else {
-      console.error("Error updating todo:", error);
-      res.status(500).json({ error: "Failed to update todo" });
-    }
-  }
-});
+router.put("/:id", (req: Request, res: Response) =>
+  todosController.updateTodo(req, res)
+);
 
 router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
