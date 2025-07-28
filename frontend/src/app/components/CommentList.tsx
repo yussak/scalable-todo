@@ -1,18 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
-
-interface Comment {
-  id: number;
-  content: string;
-  todoId: number;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: number;
-    email: string;
-  };
-}
+import { Comment } from "@/types/comment";
 
 interface CommentListProps {
   todoId: number;
