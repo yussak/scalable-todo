@@ -1,5 +1,4 @@
 import { Router, Request, Response, NextFunction } from "express";
-import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.js";
 import { AuthController } from "../controllers/authController.js";
@@ -8,7 +7,6 @@ const authRouter = Router();
 const authController = new AuthController();
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
-const SALT_ROUNDS = 10;
 
 // 認証ミドルウェア
 export const authenticateToken = async (
