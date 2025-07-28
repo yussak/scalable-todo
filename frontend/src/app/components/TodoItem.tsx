@@ -1,20 +1,7 @@
 "use client";
 
 import Link from "next/link";
-
-interface Todo {
-  id: number;
-  title: string;
-  description: string | null;
-  completed: boolean;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-  user?: {
-    id: number;
-    email: string;
-  };
-}
+import { Todo } from "@/types/todo";
 
 interface TodoItemProps {
   todo: Todo;
