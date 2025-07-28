@@ -15,6 +15,7 @@ vi.mock("../../prisma", () => ({
 // bcryptのモック
 vi.mock("bcryptjs", () => ({
   hash: vi.fn(),
+  compare: vi.fn(),
 }));
 
 // jwtのモック
@@ -37,6 +38,7 @@ const mockPrisma = prisma as {
 
 const mockBcrypt = bcrypt as {
   hash: ReturnType<typeof vi.fn>;
+  compare: ReturnType<typeof vi.fn>;
 };
 
 const mockJwt = jwt as {
@@ -176,6 +178,118 @@ describe("AuthController", () => {
       mockPrisma.user.findUnique.mockRejectedValue(new Error("Database error"));
 
       await authController.register(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal server error",
+      });
+    });
+  });
+
+  describe("login", () => {
+    it("should return 400 when email is missing", async () => {
+      req.body = { password: "password123" };
+
+      await authController.login(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Email and password are required",
+      });
+    });
+
+    it("should return 400 when password is missing", async () => {
+      req.body = { email: "test@example.com" };
+
+      await authController.login(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Email and password are required",
+      });
+    });
+
+    it("should return 400 when both email and password are missing", async () => {
+      req.body = {};
+
+      await authController.login(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Email and password are required",
+      });
+    });
+
+    it("should return 401 when user does not exist", async () => {
+      req.body = { email: "nonexistent@example.com", password: "password123" };
+
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await authController.login(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Invalid credentials",
+      });
+    });
+
+    it("should return 401 when password is incorrect", async () => {
+      req.body = { email: "test@example.com", password: "wrongpassword" };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 1,
+        email: "test@example.com",
+        password: "hashedpassword",
+      });
+      mockBcrypt.compare.mockResolvedValue(false);
+
+      await authController.login(req as Request, res as Response);
+
+      expect(mockBcrypt.compare).toHaveBeenCalledWith(
+        "wrongpassword",
+        "hashedpassword"
+      );
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Invalid credentials",
+      });
+    });
+
+    it("should login successfully with correct credentials", async () => {
+      req.body = { email: "test@example.com", password: "password123" };
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 1,
+        email: "test@example.com",
+        password: "hashedpassword",
+      });
+      mockBcrypt.compare.mockResolvedValue(true);
+      mockJwt.sign.mockReturnValue("mocked-jwt-token");
+
+      await authController.login(req as Request, res as Response);
+
+      expect(mockBcrypt.compare).toHaveBeenCalledWith(
+        "password123",
+        "hashedpassword"
+      );
+      expect(mockJwt.sign).toHaveBeenCalledWith({ userId: 1 }, "secret");
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Login successful",
+        user: {
+          id: 1,
+          email: "test@example.com",
+        },
+        token: "mocked-jwt-token",
+      });
+    });
+
+    it("should return 500 when database error occurs", async () => {
+      req.body = { email: "test@example.com", password: "password123" };
+
+      mockPrisma.user.findUnique.mockRejectedValue(new Error("Database error"));
+
+      await authController.login(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
