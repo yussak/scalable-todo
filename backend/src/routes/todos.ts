@@ -1,28 +1,5 @@
 import { Router, Request, Response } from "express";
-import prisma from "../prisma.js";
 import { TodosController } from "../controllers/todosController.js";
-
-// Helper function for todo ID validation and existence check
-async function validateAndGetTodo(
-  todoIdParam: string,
-  res: Response
-): Promise<{ todoId: number; todo: { id: number; userId: number } } | null> {
-  const todoId = parseInt(todoIdParam, 10);
-
-  if (isNaN(todoId)) {
-    return null;
-  }
-
-  const todo = await prisma.todo.findUnique({
-    where: { id: todoId },
-  });
-
-  if (todo == null) {
-    return null;
-  }
-
-  return { todoId, todo };
-}
 
 const router = Router();
 const todosController = new TodosController();
