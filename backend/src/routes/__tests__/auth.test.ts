@@ -3,7 +3,8 @@ import request from "supertest";
 import express from "express";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import authRoutes, { authenticateToken } from "../auth";
+import authRoutes from "../auth";
+import { authenticateToken } from "../../middleware/auth";
 import prisma from "../../prisma";
 
 // jwtのモック
