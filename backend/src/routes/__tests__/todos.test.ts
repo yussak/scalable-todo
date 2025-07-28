@@ -3,13 +3,14 @@ import request from "supertest";
 import express from "express";
 import prisma from "../../prisma";
 import todoRoutes from "../todos";
+import { Todo, User } from "@prisma/client";
 
 const app = express();
 app.use(express.json());
 app.use("/api/todos", todoRoutes);
 
 // 全体で共通のテストユーザー
-let testUser: any;
+let testUser: User;
 
 beforeEach(async () => {
   await prisma.todo.deleteMany();
@@ -106,7 +107,7 @@ describe("GET /api/todos", () => {
     expect(response.body).toHaveLength(3);
 
     // 各Todoの内容を確認
-    response.body.forEach((todo: any, index: number) => {
+    response.body.forEach((todo: Todo, index: number) => {
       expect(todo).toMatchObject({
         id: expect.any(Number),
         title: testTodos[index].title,
