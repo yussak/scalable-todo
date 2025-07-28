@@ -47,41 +47,8 @@ router.delete("/:id", (req: Request, res: Response) =>
   todosController.deleteTodo(req, res)
 );
 
-router.post(
-  "/:id/comments",
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { content } = req.body;
-
-      if (content == null || content.trim().length === 0) {
-        res.status(400).json({ error: "Content is required" });
-        return;
-      }
-
-      const validation = await validateAndGetTodo(id, res);
-      if (validation == null) {
-        res.status(400).json({ error: "Invalid todo ID or todo not found" });
-        return;
-      }
-
-      const { todoId, todo } = validation;
-
-      const comment = await prisma.comment.create({
-        data: {
-          content,
-          todoId,
-          userId: todo.userId,
-        },
-        include: { user: true },
-      });
-
-      res.status(201).json(comment);
-    } catch (error) {
-      console.error("Error creating comment:", error);
-      res.status(500).json({ error: "Failed to create comment" });
-    }
-  }
+router.post("/:id/comments", (req: Request, res: Response) =>
+  todosController.createComment(req, res)
 );
 
 router.get(

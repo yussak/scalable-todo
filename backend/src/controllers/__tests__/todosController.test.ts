@@ -8,9 +8,13 @@ vi.mock("../../prisma", () => ({
     todo: {
       findMany: vi.fn(),
       findFirst: vi.fn(),
+      findUnique: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+    },
+    comment: {
+      create: vi.fn(),
     },
   },
 }));
@@ -761,6 +765,151 @@ describe("TodosController", () => {
 
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to delete todo" });
+    });
+  });
+
+  describe("createComment", () => {
+    it("should return 400 when content is not provided", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = {};
+
+      await todosController.createComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Content is required" });
+    });
+
+    it("should return 400 when content is empty string", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { content: "" };
+
+      await todosController.createComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Content is required" });
+    });
+
+    it("should return 400 when content is only whitespace", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { content: "   " };
+
+      await todosController.createComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Content is required" });
+    });
+
+    it("should return 400 when todo ID is invalid", async () => {
+      mockRequest.params = { id: "invalid" };
+      mockRequest.body = { content: "Test comment" };
+
+      await todosController.createComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Invalid todo ID or todo not found",
+      });
+    });
+
+    it("should return 400 when todo not found", async () => {
+      (prisma.todo.findUnique as any).mockResolvedValue(null);
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { content: "Test comment" };
+
+      await todosController.createComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Invalid todo ID or todo not found",
+      });
+    });
+
+    it("should create comment successfully", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      const mockCreatedComment = {
+        id: 1,
+        content: "Test comment",
+        todoId: 1,
+        userId: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        user: {
+          id: 2,
+          email: "test@example.com",
+        },
+      };
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      (prisma.comment.create as any).mockResolvedValue(mockCreatedComment);
+
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { content: "Test comment" };
+
+      await todosController.createComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(prisma.comment.create).toHaveBeenCalledWith({
+        data: {
+          content: "Test comment",
+          todoId: 1,
+          userId: 2,
+        },
+        include: { user: true },
+      });
+      expect(statusMock).toHaveBeenCalledWith(201);
+      expect(jsonMock).toHaveBeenCalledWith(mockCreatedComment);
+    });
+
+    it("should return 500 when database error occurs", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      (prisma.comment.create as any).mockRejectedValue(
+        new Error("Database error")
+      );
+
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { content: "Test comment" };
+
+      await todosController.createComment(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Failed to create comment",
+      });
     });
   });
 });
