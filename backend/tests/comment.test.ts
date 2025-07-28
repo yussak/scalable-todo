@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import express from "express";
+import { User, Todo } from "@prisma/client";
 import todoRoutes from "../src/routes/todos.js";
 import prisma from "../src/prisma.js";
 
@@ -8,8 +9,8 @@ const app = express();
 app.use(express.json());
 app.use("/api/todos", todoRoutes);
 
-let testUser: any;
-let testTodo: any;
+let testUser: User;
+let testTodo: Todo;
 
 beforeEach(async () => {
   // テストデータクリーンアップ
