@@ -10,6 +10,7 @@ vi.mock("../../prisma", () => ({
       findFirst: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     },
   },
 }));
@@ -647,6 +648,119 @@ describe("TodosController", () => {
 
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to update todo" });
+    });
+  });
+
+  describe("deleteTodo", () => {
+    it("should return 400 when todo ID is invalid", async () => {
+      mockRequest.params = { id: "invalid" };
+      mockRequest.body = { userId: 1 };
+
+      await todosController.deleteTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid todo ID" });
+    });
+
+    it("should return 400 when userId is not provided", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = {};
+
+      await todosController.deleteTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+    });
+
+    it("should return 400 when userId is not a number", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { userId: "123" };
+
+      await todosController.deleteTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+    });
+
+    it("should delete todo and return remaining todos", async () => {
+      const remainingTodos = [
+        {
+          id: 2,
+          title: "Remaining Todo",
+          description: null,
+          completed: false,
+          userId: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          user: {
+            id: 1,
+            email: "test@example.com",
+          },
+        },
+      ];
+
+      (prisma.todo.delete as any).mockResolvedValue({ id: 1 });
+      (prisma.todo.findMany as any).mockResolvedValue(remainingTodos);
+
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { userId: 1 };
+
+      await todosController.deleteTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.delete).toHaveBeenCalledWith({
+        where: { id: 1, userId: 1 },
+      });
+      expect(prisma.todo.findMany).toHaveBeenCalledWith({
+        where: { userId: 1 },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+      });
+      expect(jsonMock).toHaveBeenCalledWith(remainingTodos);
+    });
+
+    it("should return 404 when todo not found", async () => {
+      const prismaError = new Error("Todo not found");
+      (prismaError as any).code = "P2025";
+      (prisma.todo.delete as any).mockRejectedValue(prismaError);
+
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { userId: 1 };
+
+      await todosController.deleteTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Todo not found" });
+    });
+
+    it("should return 500 when database error occurs", async () => {
+      (prisma.todo.delete as any).mockRejectedValue(
+        new Error("Database error")
+      );
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { userId: 1 };
+
+      await todosController.deleteTodo(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to delete todo" });
     });
   });
 });
