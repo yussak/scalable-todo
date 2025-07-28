@@ -729,9 +729,7 @@ resource "aws_db_instance" "scalable-todo-db" {
   engine         = "postgres"
   engine_version = "17.4"
 
-  # todo: t3.microにする
   instance_class = "db.t3.micro"
-  # instance_class = "db.t3.small"
 
   allocated_storage     = 20
   max_allocated_storage = 100
