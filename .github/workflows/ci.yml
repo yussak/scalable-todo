@@ -30,25 +30,6 @@ jobs:
       - name: Run lint
         run: cd ${{ matrix.target }} && yarn lint
 
-  # type-check:
-  #   name: Type Check
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       target: [frontend, backend]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '20'
-  #         cache: 'yarn'
-  #         cache-dependency-path: ${{ matrix.target }}/yarn.lock
-  #     - name: Install dependencies
-  #       run: cd ${{ matrix.target }} && yarn install --frozen-lockfile
-  #     - name: Type check
-  #       run: cd ${{ matrix.target }} && npx tsc --noEmit
-
   build:
     name: Build Check
     runs-on: ubuntu-latest
