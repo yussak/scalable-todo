@@ -246,4 +246,37 @@ export class TodosController {
       res.status(500).json({ error: "Failed to create comment" });
     }
   }
+
+  async getComments(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const todoId = parseInt(id, 10);
+
+      if (isNaN(todoId)) {
+        res.status(400).json({ error: "Invalid todo ID or todo not found" });
+        return;
+      }
+
+      const todo = await prisma.todo.findUnique({
+        where: { id: todoId },
+      });
+
+      if (todo == null) {
+        res.status(400).json({ error: "Invalid todo ID or todo not found" });
+        return;
+      }
+
+      const comments = await prisma.comment.findMany({
+        where: { todoId },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+      });
+
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      res.status(500).json({ error: "Failed to fetch comments" });
+    }
+  }
 }

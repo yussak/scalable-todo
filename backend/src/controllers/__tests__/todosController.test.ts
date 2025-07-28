@@ -15,6 +15,7 @@ vi.mock("../../prisma", () => ({
     },
     comment: {
       create: vi.fn(),
+      findMany: vi.fn(),
     },
   },
 }));
@@ -909,6 +910,142 @@ describe("TodosController", () => {
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({
         error: "Failed to create comment",
+      });
+    });
+  });
+
+  describe("getComments", () => {
+    it("should return 400 when todo ID is invalid", async () => {
+      mockRequest.params = { id: "invalid" };
+
+      await todosController.getComments(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Invalid todo ID or todo not found",
+      });
+    });
+
+    it("should return 400 when todo not found", async () => {
+      (prisma.todo.findUnique as any).mockResolvedValue(null);
+      mockRequest.params = { id: "1" };
+
+      await todosController.getComments(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Invalid todo ID or todo not found",
+      });
+    });
+
+    it("should return comments successfully", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      const mockComments = [
+        {
+          id: 1,
+          content: "First comment",
+          todoId: 1,
+          userId: 2,
+          createdAt: new Date("2023-01-02"),
+          updatedAt: new Date("2023-01-02"),
+          user: {
+            id: 2,
+            email: "test@example.com",
+          },
+        },
+        {
+          id: 2,
+          content: "Second comment",
+          todoId: 1,
+          userId: 2,
+          createdAt: new Date("2023-01-01"),
+          updatedAt: new Date("2023-01-01"),
+          user: {
+            id: 2,
+            email: "test@example.com",
+          },
+        },
+      ];
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      (prisma.comment.findMany as any).mockResolvedValue(mockComments);
+
+      mockRequest.params = { id: "1" };
+
+      await todosController.getComments(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.todo.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(prisma.comment.findMany).toHaveBeenCalledWith({
+        where: { todoId: 1 },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+      });
+      expect(jsonMock).toHaveBeenCalledWith(mockComments);
+    });
+
+    it("should return empty array when no comments exist", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      (prisma.comment.findMany as any).mockResolvedValue([]);
+
+      mockRequest.params = { id: "1" };
+
+      await todosController.getComments(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(prisma.comment.findMany).toHaveBeenCalledWith({
+        where: { todoId: 1 },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+      });
+      expect(jsonMock).toHaveBeenCalledWith([]);
+    });
+
+    it("should return 500 when database error occurs", async () => {
+      const mockTodo = {
+        id: 1,
+        userId: 2,
+      };
+
+      (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
+      (prisma.comment.findMany as any).mockRejectedValue(
+        new Error("Database error")
+      );
+
+      mockRequest.params = { id: "1" };
+
+      await todosController.getComments(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "Failed to fetch comments",
       });
     });
   });

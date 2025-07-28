@@ -51,32 +51,8 @@ router.post("/:id/comments", (req: Request, res: Response) =>
   todosController.createComment(req, res)
 );
 
-router.get(
-  "/:id/comments",
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-
-      const validation = await validateAndGetTodo(id, res);
-      if (validation == null) {
-        res.status(400).json({ error: "Invalid todo ID or todo not found" });
-        return;
-      }
-
-      const { todoId } = validation;
-
-      const comments = await prisma.comment.findMany({
-        where: { todoId },
-        include: { user: true },
-        orderBy: { createdAt: "desc" },
-      });
-
-      res.json(comments);
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-      res.status(500).json({ error: "Failed to fetch comments" });
-    }
-  }
+router.get("/:id/comments", (req: Request, res: Response) =>
+  todosController.getComments(req, res)
 );
 
 router.delete(
