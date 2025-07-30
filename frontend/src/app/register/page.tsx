@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,11 +30,9 @@ export default function RegisterPage() {
 
       // 登録成功
       console.log("Registration successful:", data);
-      // TODO: トークンを保存
-      localStorage.setItem("token", data.token);
 
-      // ホームページにリダイレクト
-      router.push("/");
+      // AuthContextを使用してログイン状態を管理（リダイレクトも自動処理）
+      login(data.token, data.user);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
