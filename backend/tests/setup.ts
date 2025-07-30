@@ -1,10 +1,7 @@
-import { beforeAll } from "vitest";
-import { config } from "dotenv";
+import { execSync } from "child_process";
 
-beforeAll(async () => {
+export async function setup() {
   // テスト実行前の安全性チェック
-  // rootのtestsでは一旦はDB接続のテストはしないのでbackendのみでチェックしている
-
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
     throw new Error(
@@ -17,4 +14,17 @@ beforeAll(async () => {
   }
 
   console.log("✅ テスト環境の安全性チェック完了");
-});
+
+  // マイグレーション自動実行
+  try {
+    console.log("🔄 テスト用DBマイグレーション実行中...");
+    execSync("npx prisma db push --skip-generate --accept-data-loss", {
+      stdio: "inherit", // schemaをDBに同期（テスト用）
+      env: { ...process.env, DATABASE_URL: dbUrl },
+    });
+    console.log("✅ マイグレーション完了");
+  } catch (error) {
+    console.error("❌ マイグレーション失敗:", error);
+    throw error;
+  }
+}
