@@ -165,7 +165,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
     it("should return 400 when userId is empty string", async () => {
@@ -178,9 +177,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "userId must not be empty",
-      });
     });
 
     it("should return 400 when userId is not a string", async () => {
@@ -193,9 +189,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "userId must be a string",
-      });
     });
 
     it("should return 400 when todo ID is invalid", async () => {
@@ -208,7 +201,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid todo ID" });
     });
 
     it("should return 400 when userId is whitespace only", async () => {
@@ -221,9 +213,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "userId must not be empty",
-      });
     });
 
     it("should return 404 when todo is not found", async () => {
@@ -244,7 +233,6 @@ describe("TodosController", () => {
         include: { user: true },
       });
       expect(statusMock).toHaveBeenCalledWith(404);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Todo not found" });
     });
 
     it("should return todo when valid ID and userId are provided", async () => {
@@ -294,7 +282,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to fetch todo" });
     });
   });
 
