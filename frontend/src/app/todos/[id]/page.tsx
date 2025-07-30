@@ -31,17 +31,11 @@ export default function TodoDetail({
   useEffect(() => {
     if (authLoading) return;
 
-    // todo: 認証チェックがないので一時的　作ったら消す
-    if (!user) {
-      router.push("/");
-      return;
-    }
-
     const fetchTodo = async () => {
       try {
         const resolvedParams = await params;
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/todos/${resolvedParams.id}?userId=${user.id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/todos/${resolvedParams.id}?userId=${user?.id}`,
           {
             headers: {
               "Content-Type": "application/json",
