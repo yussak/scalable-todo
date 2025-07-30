@@ -1,12 +1,4 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import Home from "./page";
 
 // useRouterをモック化
 const mockPush = vi.fn();
