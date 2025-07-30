@@ -34,7 +34,7 @@ yarn-error.log*
 .env*
 
 # example系は許可
-!.env.local.example
+!.env.**.example
 
 # vercel
 .vercel
