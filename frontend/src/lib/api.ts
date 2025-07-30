@@ -13,7 +13,7 @@ const api = {
       headers: {
         "Content-Type": "application/json",
       },
-      body: data ? JSON.stringify(data) : undefined,
+      body: data && JSON.stringify(data),
     });
   },
 
@@ -25,7 +25,7 @@ const api = {
       headers: {
         "Content-Type": "application/json",
       },
-      body: data ? JSON.stringify(data) : undefined,
+      body: data && JSON.stringify(data),
     });
   },
 
@@ -37,7 +37,7 @@ const api = {
       headers: {
         "Content-Type": "application/json",
       },
-      body: data ? JSON.stringify(data) : undefined,
+      body: data && JSON.stringify(data),
     });
   },
 };
