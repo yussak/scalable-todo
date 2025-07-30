@@ -89,7 +89,17 @@ export class TodosController {
     try {
       const { title, description, userId } = req.body;
 
-      if (title == null || title.trim().length === 0) {
+      if (title == null) {
+        res.status(400).json({ error: "Title is required" });
+        return;
+      }
+
+      if (typeof title !== "string") {
+        res.status(400).json({ error: "Title must be a string" });
+        return;
+      }
+
+      if (title.trim().length === 0) {
         res.status(400).json({ error: "Title is required" });
         return;
       }
@@ -136,13 +146,33 @@ export class TodosController {
         return;
       }
 
-      if (title == null || title.trim().length === 0) {
+      if (title == null) {
         res.status(400).json({ error: "Title is required" });
         return;
       }
 
-      if (userId == null || typeof userId !== "string") {
+      if (typeof title !== "string") {
+        res.status(400).json({ error: "Title must be a string" });
+        return;
+      }
+
+      if (title.trim().length === 0) {
+        res.status(400).json({ error: "Title is required" });
+        return;
+      }
+
+      if (userId == null) {
         res.status(400).json({ error: "userId is required" });
+        return;
+      }
+
+      if (typeof userId !== "string") {
+        res.status(400).json({ error: "userId must be a string" });
+        return;
+      }
+
+      if (userId.trim().length === 0) {
+        res.status(400).json({ error: "userId must not be empty" });
         return;
       }
 
@@ -219,7 +249,17 @@ export class TodosController {
       const { id } = req.params;
       const { content } = req.body;
 
-      if (content == null || content.trim().length === 0) {
+      if (content == null) {
+        res.status(400).json({ error: "Content is required" });
+        return;
+      }
+
+      if (typeof content !== "string") {
+        res.status(400).json({ error: "Content must be a string" });
+        return;
+      }
+
+      if (content.trim().length === 0) {
         res.status(400).json({ error: "Content is required" });
         return;
       }
