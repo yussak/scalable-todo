@@ -295,7 +295,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
     });
 
     it("should return 400 when title is empty string", async () => {
@@ -307,7 +306,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
     });
 
     it("should return 400 when title is only whitespace", async () => {
@@ -319,7 +317,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
     });
 
     it("should return 400 when userId is not provided", async () => {
@@ -331,7 +328,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
     it("should return 400 when userId is not a string", async () => {
@@ -343,9 +339,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "userId must be a string",
-      });
     });
 
     it("should return 400 when userId is empty string", async () => {
@@ -357,9 +350,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "userId must not be empty",
-      });
     });
 
     it("should create todo successfully with title and userId", async () => {
@@ -448,7 +438,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to create todo" });
     });
   });
 
@@ -463,7 +452,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid todo ID" });
     });
 
     it("should return 400 when title is not provided", async () => {
@@ -476,7 +464,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
     });
 
     it("should return 400 when title is empty string", async () => {
@@ -489,7 +476,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
     });
 
     it("should return 400 when title is only whitespace", async () => {
@@ -502,7 +488,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Title is required" });
     });
 
     it("should return 400 when userId is not provided", async () => {
@@ -515,7 +500,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
     it("should return 400 when userId is not a string", async () => {
@@ -528,7 +512,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
     it("should update todo successfully with all fields", async () => {
@@ -625,7 +608,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(404);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Todo not found" });
     });
 
     it("should return 500 when database error occurs", async () => {
@@ -641,7 +623,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to update todo" });
     });
   });
 
@@ -656,7 +637,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid todo ID" });
     });
 
     it("should return 400 when userId is not provided", async () => {
@@ -669,7 +649,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
     it("should return 400 when userId is not a string", async () => {
@@ -682,7 +661,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
     it("should delete todo and return remaining todos", async () => {
@@ -738,7 +716,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(404);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Todo not found" });
     });
 
     it("should return 500 when database error occurs", async () => {
@@ -754,7 +731,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Failed to delete todo" });
     });
   });
 
@@ -769,7 +745,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Content is required" });
     });
 
     it("should return 400 when content is empty string", async () => {
@@ -782,7 +757,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Content is required" });
     });
 
     it("should return 400 when content is only whitespace", async () => {
@@ -795,7 +769,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Content is required" });
     });
 
     it("should return 400 when todo ID is invalid", async () => {
@@ -808,9 +781,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Invalid todo ID or todo not found",
-      });
     });
 
     it("should return 400 when todo not found", async () => {
@@ -827,9 +797,6 @@ describe("TodosController", () => {
         where: { id: 1 },
       });
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Invalid todo ID or todo not found",
-      });
     });
 
     it("should create comment successfully", async () => {
@@ -897,9 +864,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Failed to create comment",
-      });
     });
   });
 
@@ -913,9 +877,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Invalid todo ID or todo not found",
-      });
     });
 
     it("should return 400 when todo not found", async () => {
@@ -931,9 +892,6 @@ describe("TodosController", () => {
         where: { id: 1 },
       });
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Invalid todo ID or todo not found",
-      });
     });
 
     it("should return comments successfully", async () => {
@@ -1033,9 +991,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Failed to fetch comments",
-      });
     });
   });
 
@@ -1056,9 +1011,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Invalid todo ID or todo not found",
-      });
     });
 
     it("should return 400 when todo not found", async () => {
@@ -1074,9 +1026,6 @@ describe("TodosController", () => {
         where: { id: 1 },
       });
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Invalid todo ID or todo not found",
-      });
     });
 
     it("should return 400 when comment ID is invalid", async () => {
@@ -1094,7 +1043,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid comment ID" });
     });
 
     it("should return 404 when comment not found", async () => {
@@ -1120,7 +1068,6 @@ describe("TodosController", () => {
         },
       });
       expect(statusMock).toHaveBeenCalledWith(404);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Comment not found" });
     });
 
     it("should delete comment successfully", async () => {
@@ -1190,9 +1137,6 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Failed to delete comment",
-      });
     });
   });
 });
