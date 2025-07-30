@@ -374,19 +374,6 @@ describe("TodosController", () => {
       });
     });
 
-    // todo: 「should return 400 when userId is not provided」と重複してそうなので確認
-    it("should return 400 when userId is null", async () => {
-      mockRequest.body = { title: "Test Todo", userId: null };
-
-      await todosController.createTodo(
-        mockRequest as Request,
-        mockResponse as Response
-      );
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
-    });
-
     it("should return 400 when userId is empty string", async () => {
       mockRequest.body = { title: "Test Todo", userId: "" };
 
