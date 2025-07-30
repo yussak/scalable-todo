@@ -100,6 +100,7 @@ yarn build      # TypeScript compilation to dist/
 yarn start      # Production server
 yarn test       # Run tests in watch mode
 yarn test:run   # Run tests once
+yarn tsc --noEmit # Type check only (without compilation)
 
 # Prisma commands
 npx prisma migrate dev    # Create and apply migrations
