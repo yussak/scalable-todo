@@ -95,7 +95,7 @@ describe("TodosController", () => {
     });
 
     it("should return 400 when userId is not a string", async () => {
-      mockRequest.query = { userId: mockUserId23 };
+      mockRequest.query = { userId: 123 };
 
       await todosController.getTodos(
         mockRequest as Request,
@@ -108,8 +108,8 @@ describe("TodosController", () => {
       });
     });
 
-    it("should return 400 when userId is not a valid number", async () => {
-      mockRequest.query = { userId: "invalid" };
+    it("should return 400 when userId is whitespace only", async () => {
+      mockRequest.query = { userId: "   " };
 
       await todosController.getTodos(
         mockRequest as Request,
@@ -117,7 +117,9 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid userId" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must not be empty",
+      });
     });
 
     it("should return todos when valid userId is provided", async () => {
@@ -145,7 +147,7 @@ describe("TodosController", () => {
         mockResponse as Response
       );
 
-      expect(mockTodoModel.getTodosByUserId).toHaveBeenCalledWith(1);
+      expect(mockTodoModel.getTodosByUserId).toHaveBeenCalledWith(mockUserId);
       expect(jsonMock).toHaveBeenCalledWith(mockTodos);
     });
 
@@ -189,12 +191,14 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must not be empty",
+      });
     });
 
     it("should return 400 when userId is not a string", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.query = { userId: mockUserId23 };
+      mockRequest.query = { userId: 123 };
 
       await todosController.getTodoById(
         mockRequest as Request,
@@ -202,7 +206,9 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must be a string",
+      });
     });
 
     it("should return 400 when todo ID is invalid", async () => {
@@ -218,9 +224,9 @@ describe("TodosController", () => {
       expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid todo ID" });
     });
 
-    it("should return 400 when userId is invalid", async () => {
+    it("should return 400 when userId is whitespace only", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.query = { userId: "invalid" };
+      mockRequest.query = { userId: "   " };
 
       await todosController.getTodoById(
         mockRequest as Request,
@@ -228,7 +234,9 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid userId" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must not be empty",
+      });
     });
 
     it("should return 404 when todo is not found", async () => {
@@ -352,8 +360,8 @@ describe("TodosController", () => {
       expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
-    it("should return 400 when userId is not a number", async () => {
-      mockRequest.body = { title: "Test Todo", userId: mockUserId2 };
+    it("should return 400 when userId is not a string", async () => {
+      mockRequest.body = { title: "Test Todo", userId: 123 };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -361,9 +369,12 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must be a string",
+      });
     });
 
+    // todo: 「should return 400 when userId is not provided」と重複してそうなので確認
     it("should return 400 when userId is null", async () => {
       mockRequest.body = { title: "Test Todo", userId: null };
 
@@ -376,8 +387,8 @@ describe("TodosController", () => {
       expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
-    it("should return 400 when userId is a string", async () => {
-      mockRequest.body = { title: "Test Todo", userId: "invalid" };
+    it("should return 400 when userId is empty string", async () => {
+      mockRequest.body = { title: "Test Todo", userId: "" };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -385,7 +396,9 @@ describe("TodosController", () => {
       );
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "userId must not be empty",
+      });
     });
 
     it("should create todo successfully with title and userId", async () => {
@@ -544,9 +557,9 @@ describe("TodosController", () => {
       expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
-    it("should return 400 when userId is not a number", async () => {
+    it("should return 400 when userId is not a string", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.body = { title: "Updated Todo", userId: mockUserId2 };
+      mockRequest.body = { title: "Updated Todo", userId: 123 };
 
       await todosController.updateTodo(
         mockRequest as Request,
@@ -698,9 +711,9 @@ describe("TodosController", () => {
       expect(jsonMock).toHaveBeenCalledWith({ error: "userId is required" });
     });
 
-    it("should return 400 when userId is not a number", async () => {
+    it("should return 400 when userId is not a string", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.body = { userId: mockUserId2 };
+      mockRequest.body = { userId: 123 };
 
       await todosController.deleteTodo(
         mockRequest as Request,
