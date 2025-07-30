@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, vi } from "vitest";
 
 // useRouterをモック化
 const mockPush = vi.fn();

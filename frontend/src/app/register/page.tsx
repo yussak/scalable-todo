@@ -7,7 +7,6 @@ import api from "@/lib/api";
 import { useAuth } from "@/app/contexts/AuthContext";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
