@@ -12,8 +12,10 @@ const mockRouter = {
   push: mockPush,
 };
 
+const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
+
 const mockUseAuth = {
-  user: { id: 1, email: "test@example.com" },
+  user: { id: mockUserId, email: "test@example.com" },
   logout: vi.fn(),
 };
 
@@ -44,7 +46,7 @@ describe("TodoDetail", () => {
       title: "Test Todo",
       description: "Test Description",
       completed: false,
-      userId: 1,
+      userId: mockUserId,
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     };
@@ -63,7 +65,7 @@ describe("TodoDetail", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      `${process.env.NEXT_PUBLIC_API_URL}/todos/1?userId=1`,
+      `${process.env.NEXT_PUBLIC_API_URL}/todos/1?userId=${mockUserId}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +80,7 @@ describe("TodoDetail", () => {
       title: "Completed Todo",
       description: "This is completed",
       completed: true,
-      userId: 1,
+      userId: mockUserId,
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     };
@@ -126,7 +128,7 @@ describe("TodoDetail", () => {
       title: "Test Todo",
       description: "Test Description",
       completed: false,
-      userId: 1,
+      userId: mockUserId,
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     };
@@ -154,7 +156,7 @@ describe("TodoDetail", () => {
       title: "Test Todo",
       description: null,
       completed: false,
-      userId: 1,
+      userId: mockUserId,
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z",
     };

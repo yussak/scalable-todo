@@ -3,7 +3,7 @@ import { Todo, User } from "@prisma/client";
 
 // 依存性注入とテスト時のモック作成のために定義
 export interface ITodoModel {
-  getTodosByUserId(userId: number): Promise<TodoWithUser[]>;
+  getTodosByUserId(userId: string): Promise<TodoWithUser[]>;
 }
 
 // TodoとUserをJOINした結果の型定義
@@ -12,7 +12,7 @@ export type TodoWithUser = Todo & {
 };
 
 export class TodoModel implements ITodoModel {
-  async getTodosByUserId(userId: number): Promise<TodoWithUser[]> {
+  async getTodosByUserId(userId: string): Promise<TodoWithUser[]> {
     return await prisma.todo.findMany({
       where: { userId },
       include: { user: true },

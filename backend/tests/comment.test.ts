@@ -4,6 +4,7 @@ import express from "express";
 import { User, Todo } from "@prisma/client";
 import todoRoutes from "../src/routes/todos.js";
 import prisma from "../src/prisma.js";
+import { randomUUID } from "crypto";
 
 const app = express();
 app.use(express.json());
@@ -22,6 +23,7 @@ beforeEach(async () => {
   const timestamp = Date.now();
   testUser = await prisma.user.create({
     data: {
+      id: randomUUID(),
       email: `testuser-${timestamp}@example.test`,
       password: "hashedPassword123",
     },

@@ -3,11 +3,11 @@ export interface Todo {
   title: string;
   description: string | null;
   completed: boolean;
-  userId: number;
+  userId: string;
   createdAt: string;
   updatedAt: string;
   user?: {
-    id: number;
+    id: string;
     email: string;
   };
 }

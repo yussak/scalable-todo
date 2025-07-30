@@ -140,12 +140,13 @@ describe("AuthController", () => {
     });
 
     it("should register user successfully", async () => {
+      const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
       req.body = { email: "new@example.com", password: "password123" };
 
       mockPrisma.user.findUnique.mockResolvedValue(null);
       mockBcrypt.hash.mockResolvedValue("hashedpassword");
       mockPrisma.user.create.mockResolvedValue({
-        id: 1,
+        id: mockUserId,
         email: "new@example.com",
         password: "hashedpassword",
       });
@@ -160,12 +161,15 @@ describe("AuthController", () => {
           password: "hashedpassword",
         },
       });
-      expect(mockJwt.sign).toHaveBeenCalledWith({ userId: 1 }, "secret");
+      expect(mockJwt.sign).toHaveBeenCalledWith(
+        { userId: mockUserId },
+        "secret"
+      );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         message: "User registered successfully",
         user: {
-          id: 1,
+          id: mockUserId,
           email: "new@example.com",
         },
         token: "mocked-jwt-token",
@@ -256,10 +260,11 @@ describe("AuthController", () => {
     });
 
     it("should login successfully with correct credentials", async () => {
+      const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
       req.body = { email: "test@example.com", password: "password123" };
 
       mockPrisma.user.findUnique.mockResolvedValue({
-        id: 1,
+        id: mockUserId,
         email: "test@example.com",
         password: "hashedpassword",
       });
@@ -272,12 +277,15 @@ describe("AuthController", () => {
         "password123",
         "hashedpassword"
       );
-      expect(mockJwt.sign).toHaveBeenCalledWith({ userId: 1 }, "secret");
+      expect(mockJwt.sign).toHaveBeenCalledWith(
+        { userId: mockUserId },
+        "secret"
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         message: "Login successful",
         user: {
-          id: 1,
+          id: mockUserId,
           email: "test@example.com",
         },
         token: "mocked-jwt-token",

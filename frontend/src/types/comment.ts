@@ -2,11 +2,11 @@ export interface Comment {
   id: number;
   content: string;
   todoId: number;
-  userId: number;
+  userId: string;
   createdAt: string;
   updatedAt: string;
   user: {
-    id: number;
+    id: string;
     email: string;
   };
 }

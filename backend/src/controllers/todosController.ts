@@ -29,13 +29,7 @@ export class TodosController {
         return;
       }
 
-      const userIdNum = parseInt(userId as string, 10);
-      if (isNaN(userIdNum)) {
-        res.status(400).json({ error: "Invalid userId" });
-        return;
-      }
-
-      const todos = await this.todoModel.getTodosByUserId(userIdNum);
+      const todos = await this.todoModel.getTodosByUserId(userId);
 
       res.json(todos);
     } catch (error) {
@@ -59,22 +53,16 @@ export class TodosController {
       }
 
       const todoId = parseInt(id, 10);
-      const userIdNum = parseInt(userId as string, 10);
 
       if (isNaN(todoId)) {
         res.status(400).json({ error: "Invalid todo ID" });
         return;
       }
 
-      if (isNaN(userIdNum)) {
-        res.status(400).json({ error: "Invalid userId" });
-        return;
-      }
-
       const todo = await prisma.todo.findFirst({
         where: {
           id: todoId,
-          userId: userIdNum,
+          userId: userId,
         },
         include: { user: true },
       });
@@ -100,7 +88,7 @@ export class TodosController {
         return;
       }
 
-      if (userId == null || typeof userId !== "number") {
+      if (userId == null || typeof userId !== "string") {
         res.status(400).json({ error: "userId is required" });
         return;
       }
@@ -137,7 +125,7 @@ export class TodosController {
         return;
       }
 
-      if (userId == null || typeof userId !== "number") {
+      if (userId == null || typeof userId !== "string") {
         res.status(400).json({ error: "userId is required" });
         return;
       }
@@ -179,7 +167,7 @@ export class TodosController {
         return;
       }
 
-      if (userId == null || typeof userId !== "number") {
+      if (userId == null || typeof userId !== "string") {
         res.status(400).json({ error: "userId is required" });
         return;
       }

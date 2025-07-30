@@ -30,6 +30,10 @@ vi.mock("../../prisma", () => ({
 }));
 
 describe("TodosController", () => {
+  // UUID定数定義
+  const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
+  const mockUserId2 = "550e8400-e29b-41d4-a716-446655440001";
+
   let todosController: TodosController;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
@@ -91,7 +95,7 @@ describe("TodosController", () => {
     });
 
     it("should return 400 when userId is not a string", async () => {
-      mockRequest.query = { userId: 123 };
+      mockRequest.query = { userId: mockUserId23 };
 
       await todosController.getTodos(
         mockRequest as Request,
@@ -123,18 +127,18 @@ describe("TodosController", () => {
           title: "Test Todo",
           description: "Test Description",
           completed: false,
-          userId: 1,
+          userId: mockUserId,
           createdAt: new Date(),
           updatedAt: new Date(),
           user: {
-            id: 1,
+            id: mockUserId,
             email: "test@example.com",
           },
         },
       ];
 
       mockTodoModel.getTodosByUserId.mockResolvedValue(mockTodos);
-      mockRequest.query = { userId: "1" };
+      mockRequest.query = { userId: mockUserId };
 
       await todosController.getTodos(
         mockRequest as Request,
@@ -149,7 +153,7 @@ describe("TodosController", () => {
       mockTodoModel.getTodosByUserId.mockRejectedValue(
         new Error("Database error")
       );
-      mockRequest.query = { userId: "1" };
+      mockRequest.query = { userId: mockUserId };
 
       await todosController.getTodos(
         mockRequest as Request,
@@ -190,7 +194,7 @@ describe("TodosController", () => {
 
     it("should return 400 when userId is not a string", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.query = { userId: 123 };
+      mockRequest.query = { userId: mockUserId23 };
 
       await todosController.getTodoById(
         mockRequest as Request,
@@ -203,7 +207,7 @@ describe("TodosController", () => {
 
     it("should return 400 when todo ID is invalid", async () => {
       mockRequest.params = { id: "invalid" };
-      mockRequest.query = { userId: "1" };
+      mockRequest.query = { userId: mockUserId };
 
       await todosController.getTodoById(
         mockRequest as Request,
@@ -230,7 +234,7 @@ describe("TodosController", () => {
     it("should return 404 when todo is not found", async () => {
       (prisma.todo.findFirst as any).mockResolvedValue(null);
       mockRequest.params = { id: "1" };
-      mockRequest.query = { userId: "1" };
+      mockRequest.query = { userId: mockUserId };
 
       await todosController.getTodoById(
         mockRequest as Request,
@@ -240,7 +244,7 @@ describe("TodosController", () => {
       expect(prisma.todo.findFirst).toHaveBeenCalledWith({
         where: {
           id: 1,
-          userId: 1,
+          userId: mockUserId,
         },
         include: { user: true },
       });
@@ -254,18 +258,18 @@ describe("TodosController", () => {
         title: "Test Todo",
         description: "Test Description",
         completed: false,
-        userId: 1,
+        userId: mockUserId,
         createdAt: new Date(),
         updatedAt: new Date(),
         user: {
-          id: 1,
+          id: mockUserId,
           email: "test@example.com",
         },
       };
 
       (prisma.todo.findFirst as any).mockResolvedValue(mockTodo);
       mockRequest.params = { id: "1" };
-      mockRequest.query = { userId: "1" };
+      mockRequest.query = { userId: mockUserId };
 
       await todosController.getTodoById(
         mockRequest as Request,
@@ -275,7 +279,7 @@ describe("TodosController", () => {
       expect(prisma.todo.findFirst).toHaveBeenCalledWith({
         where: {
           id: 1,
-          userId: 1,
+          userId: mockUserId,
         },
         include: { user: true },
       });
@@ -287,7 +291,7 @@ describe("TodosController", () => {
         new Error("Database error")
       );
       mockRequest.params = { id: "1" };
-      mockRequest.query = { userId: "1" };
+      mockRequest.query = { userId: mockUserId };
 
       await todosController.getTodoById(
         mockRequest as Request,
@@ -301,7 +305,7 @@ describe("TodosController", () => {
 
   describe("createTodo", () => {
     it("should return 400 when title is not provided", async () => {
-      mockRequest.body = { userId: 1 };
+      mockRequest.body = { userId: mockUserId };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -313,7 +317,7 @@ describe("TodosController", () => {
     });
 
     it("should return 400 when title is empty string", async () => {
-      mockRequest.body = { title: "", userId: 1 };
+      mockRequest.body = { title: "", userId: mockUserId };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -325,7 +329,7 @@ describe("TodosController", () => {
     });
 
     it("should return 400 when title is only whitespace", async () => {
-      mockRequest.body = { title: "   ", userId: 1 };
+      mockRequest.body = { title: "   ", userId: mockUserId };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -349,7 +353,7 @@ describe("TodosController", () => {
     });
 
     it("should return 400 when userId is not a number", async () => {
-      mockRequest.body = { title: "Test Todo", userId: "123" };
+      mockRequest.body = { title: "Test Todo", userId: mockUserId2 };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -390,17 +394,17 @@ describe("TodosController", () => {
         title: "Test Todo",
         description: null,
         completed: false,
-        userId: 1,
+        userId: mockUserId,
         createdAt: new Date(),
         updatedAt: new Date(),
         user: {
-          id: 1,
+          id: mockUserId,
           email: "test@example.com",
         },
       };
 
       (prisma.todo.create as any).mockResolvedValue(mockCreatedTodo);
-      mockRequest.body = { title: "Test Todo", userId: 1 };
+      mockRequest.body = { title: "Test Todo", userId: mockUserId };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -411,7 +415,7 @@ describe("TodosController", () => {
         data: {
           title: "Test Todo",
           description: null,
-          userId: 1,
+          userId: mockUserId,
         },
         include: { user: true },
       });
@@ -425,11 +429,11 @@ describe("TodosController", () => {
         title: "Test Todo",
         description: "Test Description",
         completed: false,
-        userId: 1,
+        userId: mockUserId,
         createdAt: new Date(),
         updatedAt: new Date(),
         user: {
-          id: 1,
+          id: mockUserId,
           email: "test@example.com",
         },
       };
@@ -438,7 +442,7 @@ describe("TodosController", () => {
       mockRequest.body = {
         title: "Test Todo",
         description: "Test Description",
-        userId: 1,
+        userId: mockUserId,
       };
 
       await todosController.createTodo(
@@ -450,7 +454,7 @@ describe("TodosController", () => {
         data: {
           title: "Test Todo",
           description: "Test Description",
-          userId: 1,
+          userId: mockUserId,
         },
         include: { user: true },
       });
@@ -462,7 +466,7 @@ describe("TodosController", () => {
       (prisma.todo.create as any).mockRejectedValue(
         new Error("Database error")
       );
-      mockRequest.body = { title: "Test Todo", userId: 1 };
+      mockRequest.body = { title: "Test Todo", userId: mockUserId };
 
       await todosController.createTodo(
         mockRequest as Request,
@@ -477,7 +481,7 @@ describe("TodosController", () => {
   describe("updateTodo", () => {
     it("should return 400 when todo ID is invalid", async () => {
       mockRequest.params = { id: "invalid" };
-      mockRequest.body = { title: "Updated Todo", userId: 1 };
+      mockRequest.body = { title: "Updated Todo", userId: mockUserId };
 
       await todosController.updateTodo(
         mockRequest as Request,
@@ -490,7 +494,7 @@ describe("TodosController", () => {
 
     it("should return 400 when title is not provided", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.body = { userId: 1 };
+      mockRequest.body = { userId: mockUserId };
 
       await todosController.updateTodo(
         mockRequest as Request,
@@ -503,7 +507,7 @@ describe("TodosController", () => {
 
     it("should return 400 when title is empty string", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.body = { title: "", userId: 1 };
+      mockRequest.body = { title: "", userId: mockUserId };
 
       await todosController.updateTodo(
         mockRequest as Request,
@@ -516,7 +520,7 @@ describe("TodosController", () => {
 
     it("should return 400 when title is only whitespace", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.body = { title: "   ", userId: 1 };
+      mockRequest.body = { title: "   ", userId: mockUserId };
 
       await todosController.updateTodo(
         mockRequest as Request,
@@ -542,7 +546,7 @@ describe("TodosController", () => {
 
     it("should return 400 when userId is not a number", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.body = { title: "Updated Todo", userId: "123" };
+      mockRequest.body = { title: "Updated Todo", userId: mockUserId2 };
 
       await todosController.updateTodo(
         mockRequest as Request,
@@ -559,11 +563,11 @@ describe("TodosController", () => {
         title: "Updated Todo",
         description: "Updated Description",
         completed: true,
-        userId: 1,
+        userId: mockUserId,
         createdAt: new Date(),
         updatedAt: new Date(),
         user: {
-          id: 1,
+          id: mockUserId,
           email: "test@example.com",
         },
       };
@@ -574,7 +578,7 @@ describe("TodosController", () => {
         title: "Updated Todo",
         description: "Updated Description",
         completed: true,
-        userId: 1,
+        userId: mockUserId,
       };
 
       await todosController.updateTodo(
@@ -583,7 +587,7 @@ describe("TodosController", () => {
       );
 
       expect(prisma.todo.update).toHaveBeenCalledWith({
-        where: { id: 1, userId: 1 },
+        where: { id: 1, userId: mockUserId },
         data: {
           title: "Updated Todo",
           description: "Updated Description",
@@ -600,11 +604,11 @@ describe("TodosController", () => {
         title: "Updated Todo",
         description: null,
         completed: false,
-        userId: 1,
+        userId: mockUserId,
         createdAt: new Date(),
         updatedAt: new Date(),
         user: {
-          id: 1,
+          id: mockUserId,
           email: "test@example.com",
         },
       };
@@ -613,7 +617,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: "1" };
       mockRequest.body = {
         title: "Updated Todo",
-        userId: 1,
+        userId: mockUserId,
       };
 
       await todosController.updateTodo(
@@ -622,7 +626,7 @@ describe("TodosController", () => {
       );
 
       expect(prisma.todo.update).toHaveBeenCalledWith({
-        where: { id: 1, userId: 1 },
+        where: { id: 1, userId: mockUserId },
         data: {
           title: "Updated Todo",
           description: undefined,
@@ -639,7 +643,7 @@ describe("TodosController", () => {
       (prisma.todo.update as any).mockRejectedValue(prismaError);
 
       mockRequest.params = { id: "1" };
-      mockRequest.body = { title: "Updated Todo", userId: 1 };
+      mockRequest.body = { title: "Updated Todo", userId: mockUserId };
 
       await todosController.updateTodo(
         mockRequest as Request,
@@ -655,7 +659,7 @@ describe("TodosController", () => {
         new Error("Database error")
       );
       mockRequest.params = { id: "1" };
-      mockRequest.body = { title: "Updated Todo", userId: 1 };
+      mockRequest.body = { title: "Updated Todo", userId: mockUserId };
 
       await todosController.updateTodo(
         mockRequest as Request,
@@ -670,7 +674,7 @@ describe("TodosController", () => {
   describe("deleteTodo", () => {
     it("should return 400 when todo ID is invalid", async () => {
       mockRequest.params = { id: "invalid" };
-      mockRequest.body = { userId: 1 };
+      mockRequest.body = { userId: mockUserId };
 
       await todosController.deleteTodo(
         mockRequest as Request,
@@ -696,7 +700,7 @@ describe("TodosController", () => {
 
     it("should return 400 when userId is not a number", async () => {
       mockRequest.params = { id: "1" };
-      mockRequest.body = { userId: "123" };
+      mockRequest.body = { userId: mockUserId2 };
 
       await todosController.deleteTodo(
         mockRequest as Request,
@@ -714,11 +718,11 @@ describe("TodosController", () => {
           title: "Remaining Todo",
           description: null,
           completed: false,
-          userId: 1,
+          userId: mockUserId,
           createdAt: new Date(),
           updatedAt: new Date(),
           user: {
-            id: 1,
+            id: mockUserId,
             email: "test@example.com",
           },
         },
@@ -728,7 +732,7 @@ describe("TodosController", () => {
       (prisma.todo.findMany as any).mockResolvedValue(remainingTodos);
 
       mockRequest.params = { id: "1" };
-      mockRequest.body = { userId: 1 };
+      mockRequest.body = { userId: mockUserId };
 
       await todosController.deleteTodo(
         mockRequest as Request,
@@ -736,10 +740,10 @@ describe("TodosController", () => {
       );
 
       expect(prisma.todo.delete).toHaveBeenCalledWith({
-        where: { id: 1, userId: 1 },
+        where: { id: 1, userId: mockUserId },
       });
       expect(prisma.todo.findMany).toHaveBeenCalledWith({
-        where: { userId: 1 },
+        where: { userId: mockUserId },
         include: { user: true },
         orderBy: { createdAt: "desc" },
       });
@@ -752,7 +756,7 @@ describe("TodosController", () => {
       (prisma.todo.delete as any).mockRejectedValue(prismaError);
 
       mockRequest.params = { id: "1" };
-      mockRequest.body = { userId: 1 };
+      mockRequest.body = { userId: mockUserId };
 
       await todosController.deleteTodo(
         mockRequest as Request,
@@ -768,7 +772,7 @@ describe("TodosController", () => {
         new Error("Database error")
       );
       mockRequest.params = { id: "1" };
-      mockRequest.body = { userId: 1 };
+      mockRequest.body = { userId: mockUserId };
 
       await todosController.deleteTodo(
         mockRequest as Request,
@@ -857,18 +861,18 @@ describe("TodosController", () => {
     it("should create comment successfully", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       const mockCreatedComment = {
         id: 1,
         content: "Test comment",
         todoId: 1,
-        userId: 2,
+        userId: mockUserId2,
         createdAt: new Date(),
         updatedAt: new Date(),
         user: {
-          id: 2,
+          id: mockUserId2,
           email: "test@example.com",
         },
       };
@@ -891,7 +895,7 @@ describe("TodosController", () => {
         data: {
           content: "Test comment",
           todoId: 1,
-          userId: 2,
+          userId: mockUserId2,
         },
         include: { user: true },
       });
@@ -902,7 +906,7 @@ describe("TodosController", () => {
     it("should return 500 when database error occurs", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
@@ -961,7 +965,7 @@ describe("TodosController", () => {
     it("should return comments successfully", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       const mockComments = [
@@ -969,11 +973,11 @@ describe("TodosController", () => {
           id: 1,
           content: "First comment",
           todoId: 1,
-          userId: 2,
+          userId: mockUserId2,
           createdAt: new Date("2023-01-02"),
           updatedAt: new Date("2023-01-02"),
           user: {
-            id: 2,
+            id: mockUserId2,
             email: "test@example.com",
           },
         },
@@ -981,11 +985,11 @@ describe("TodosController", () => {
           id: 2,
           content: "Second comment",
           todoId: 1,
-          userId: 2,
+          userId: mockUserId2,
           createdAt: new Date("2023-01-01"),
           updatedAt: new Date("2023-01-01"),
           user: {
-            id: 2,
+            id: mockUserId2,
             email: "test@example.com",
           },
         },
@@ -1015,7 +1019,7 @@ describe("TodosController", () => {
     it("should return empty array when no comments exist", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
@@ -1039,7 +1043,7 @@ describe("TodosController", () => {
     it("should return 500 when database error occurs", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
@@ -1104,7 +1108,7 @@ describe("TodosController", () => {
     it("should return 400 when comment ID is invalid", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
@@ -1122,7 +1126,7 @@ describe("TodosController", () => {
     it("should return 404 when comment not found", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
@@ -1148,14 +1152,14 @@ describe("TodosController", () => {
     it("should delete comment successfully", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       const mockComment = {
         id: 1,
         content: "Test comment",
         todoId: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);
@@ -1188,14 +1192,14 @@ describe("TodosController", () => {
     it("should return 500 when database error occurs", async () => {
       const mockTodo = {
         id: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       const mockComment = {
         id: 1,
         content: "Test comment",
         todoId: 1,
-        userId: 2,
+        userId: mockUserId2,
       };
 
       (prisma.todo.findUnique as any).mockResolvedValue(mockTodo);

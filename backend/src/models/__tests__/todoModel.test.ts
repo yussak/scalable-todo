@@ -19,6 +19,8 @@ describe("TodoModel", () => {
   });
 
   describe("getTodosByUserId", () => {
+    const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
+
     it("should call prisma.todo.findMany with correct parameters and return todos", async () => {
       const mockTodos = [
         {
@@ -26,11 +28,11 @@ describe("TodoModel", () => {
           title: "Test Todo",
           description: "Test Description",
           completed: false,
-          userId: 1,
+          userId: mockUserId,
           createdAt: new Date(),
           updatedAt: new Date(),
           user: {
-            id: 1,
+            id: mockUserId,
             email: "test@example.com",
           },
         },
@@ -38,10 +40,10 @@ describe("TodoModel", () => {
 
       (prisma.todo.findMany as any).mockResolvedValue(mockTodos);
 
-      const result = await todoModel.getTodosByUserId(1);
+      const result = await todoModel.getTodosByUserId(mockUserId);
 
       expect(prisma.todo.findMany).toHaveBeenCalledWith({
-        where: { userId: 1 },
+        where: { userId: mockUserId },
         include: { user: true },
         orderBy: { createdAt: "desc" },
       });
@@ -51,7 +53,7 @@ describe("TodoModel", () => {
     it("should return empty array when no todos found", async () => {
       (prisma.todo.findMany as any).mockResolvedValue([]);
 
-      const result = await todoModel.getTodosByUserId(1);
+      const result = await todoModel.getTodosByUserId(mockUserId);
 
       expect(result).toEqual([]);
     });
@@ -60,7 +62,7 @@ describe("TodoModel", () => {
       const dbError = new Error("Database connection failed");
       (prisma.todo.findMany as any).mockRejectedValue(dbError);
 
-      await expect(todoModel.getTodosByUserId(1)).rejects.toThrow(
+      await expect(todoModel.getTodosByUserId(mockUserId)).rejects.toThrow(
         "Database connection failed"
       );
     });
