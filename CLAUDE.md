@@ -126,3 +126,8 @@ Backend connects to PostgreSQL using:
 - User: `postgres`
 - Password: `password`
 - Connection string: `postgresql://postgres:password@db:5432/myapp`
+
+## コーディング規約
+
+- any は禁止
+- controller のテストはエラーメッセージはチェックしない
