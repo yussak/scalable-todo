@@ -17,9 +17,7 @@ const api = {
     });
   },
 
-  // TODO: CIビルドを通すため一時的に無視、後で正しく修正
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  put(url: string, data?: any): Promise<Response> {
+  put(url: string, data?: Record<string, unknown>): Promise<Response> {
     return fetch(`${BASE_URL}${url}`, {
       method: "PUT",
       headers: {
@@ -29,9 +27,7 @@ const api = {
     });
   },
 
-  // TODO: CIビルドを通すため一時的に無視、後で正しく修正
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete(url: string, data?: any): Promise<Response> {
+  delete(url: string, data?: Record<string, unknown>): Promise<Response> {
     return fetch(`${BASE_URL}${url}`, {
       method: "DELETE",
       headers: {
