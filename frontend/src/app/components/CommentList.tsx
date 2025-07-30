@@ -26,6 +26,7 @@ export function CommentList({ todoId, refresh }: CommentListProps) {
         setError("コメントの取得に失敗しました");
       }
     } catch (err) {
+      console.error("Failed to fetch comments:", err);
       setError("コメントの取得でエラーが発生しました");
     } finally {
       setLoading(false);
@@ -49,6 +50,7 @@ export function CommentList({ todoId, refresh }: CommentListProps) {
         setError("コメントの削除に失敗しました");
       }
     } catch (err) {
+      console.error("Failed to delete comment:", err);
       setError("コメントの削除でエラーが発生しました");
     } finally {
       setDeletingIds((prev) => {
