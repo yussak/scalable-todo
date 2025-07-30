@@ -335,8 +335,9 @@ export class TodosController {
 
       const todoId = parseInt(id, 10);
 
+      // todo: uuidにする
       if (isNaN(todoId)) {
-        res.status(400).json({ error: "Invalid todo ID or todo not found" });
+        res.status(400).json({ error: "Invalid todo ID" });
         return;
       }
 
@@ -345,7 +346,7 @@ export class TodosController {
       });
 
       if (todo == null) {
-        res.status(400).json({ error: "Invalid todo ID or todo not found" });
+        res.status(404).json({ error: "Todo not found" });
         return;
       }
 

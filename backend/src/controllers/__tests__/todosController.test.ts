@@ -30,7 +30,6 @@ vi.mock("../../prisma", () => ({
 }));
 
 describe("TodosController", () => {
-  // UUID定数定義
   const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
   const mockUserId2 = "550e8400-e29b-41d4-a716-446655440001";
 
@@ -1013,7 +1012,7 @@ describe("TodosController", () => {
       expect(statusMock).toHaveBeenCalledWith(400);
     });
 
-    it("should return 400 when todo not found", async () => {
+    it("should return 404 when todo not found", async () => {
       (prisma.todo.findUnique as any).mockResolvedValue(null);
       mockRequest.params = { id: "1", commentId: "1" };
 
@@ -1025,7 +1024,7 @@ describe("TodosController", () => {
       expect(prisma.todo.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
       });
-      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(statusMock).toHaveBeenCalledWith(404);
     });
 
     it("should return 400 when comment ID is invalid", async () => {
