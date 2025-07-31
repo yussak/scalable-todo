@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.js";
+import { AuthenticatedRequest } from "../types/express.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
@@ -30,7 +31,7 @@ export const authenticateToken = async (
       return;
     }
 
-    req.user = user;
+    (req as AuthenticatedRequest).user = user;
     next();
   } catch (error) {
     console.error("Authentication middleware error:", error);

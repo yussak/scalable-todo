@@ -5,15 +5,11 @@
  * Express.Requestにuserプロパティを追加する。
  * これにより、any型を使わずに型安全にreq.userを参照できる。
  */
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email: string;
-      };
-    }
-  }
-}
+import { Request } from "express";
 
-export {};
+export interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    email: string;
+  };
+}
