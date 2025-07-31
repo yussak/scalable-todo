@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../prisma.js";
 import { TodoModel, ITodoModel } from "../models/todoModel.js";
+import { isValidUUID } from "../utils/uuid.js";
 
 export class TodosController {
   private todoModel: ITodoModel;
@@ -58,16 +59,14 @@ export class TodosController {
         return;
       }
 
-      const todoId = parseInt(id, 10);
-
-      if (isNaN(todoId)) {
+      if (!isValidUUID(id)) {
         res.status(400).json({ error: "Invalid todo ID" });
         return;
       }
 
       const todo = await prisma.todo.findFirst({
         where: {
-          id: todoId,
+          id: id,
           userId: userId,
         },
         include: { user: true },
@@ -139,9 +138,8 @@ export class TodosController {
     try {
       const { id } = req.params;
       const { title, description, completed, userId } = req.body;
-      const todoId = parseInt(id, 10);
 
-      if (isNaN(todoId)) {
+      if (!isValidUUID(id)) {
         res.status(400).json({ error: "Invalid todo ID" });
         return;
       }
@@ -177,7 +175,7 @@ export class TodosController {
       }
 
       const updatedTodo = await prisma.todo.update({
-        where: { id: todoId, userId: userId },
+        where: { id: id, userId: userId },
         data: {
           title: title.trim(),
           description: description !== undefined ? description : undefined,
@@ -206,9 +204,8 @@ export class TodosController {
     try {
       const { id } = req.params;
       const { userId } = req.body;
-      const todoId = parseInt(id, 10);
 
-      if (isNaN(todoId)) {
+      if (!isValidUUID(id)) {
         res.status(400).json({ error: "Invalid todo ID" });
         return;
       }
@@ -219,7 +216,7 @@ export class TodosController {
       }
 
       await prisma.todo.delete({
-        where: { id: todoId, userId: userId },
+        where: { id: id, userId: userId },
       });
 
       const remainingTodos = await prisma.todo.findMany({
@@ -264,15 +261,13 @@ export class TodosController {
         return;
       }
 
-      const todoId = parseInt(id, 10);
-
-      if (isNaN(todoId)) {
+      if (!isValidUUID(id)) {
         res.status(400).json({ error: "Invalid todo ID or todo not found" });
         return;
       }
 
       const todo = await prisma.todo.findUnique({
-        where: { id: todoId },
+        where: { id: id },
       });
 
       if (todo == null) {
@@ -283,7 +278,7 @@ export class TodosController {
       const comment = await prisma.comment.create({
         data: {
           content,
-          todoId,
+          todoId: id,
           userId: todo.userId,
         },
         include: { user: true },
@@ -300,15 +295,13 @@ export class TodosController {
     try {
       const { id } = req.params;
 
-      const todoId = parseInt(id, 10);
-
-      if (isNaN(todoId)) {
+      if (!isValidUUID(id)) {
         res.status(400).json({ error: "Invalid todo ID" });
         return;
       }
 
       const todo = await prisma.todo.findUnique({
-        where: { id: todoId },
+        where: { id: id },
       });
 
       if (todo == null) {
@@ -317,7 +310,7 @@ export class TodosController {
       }
 
       const comments = await prisma.comment.findMany({
-        where: { todoId },
+        where: { todoId: id },
         include: { user: true },
         orderBy: { createdAt: "desc" },
       });
@@ -333,16 +326,13 @@ export class TodosController {
     try {
       const { id, commentId } = req.params;
 
-      const todoId = parseInt(id, 10);
-
-      // todo: uuidにする
-      if (isNaN(todoId)) {
+      if (!isValidUUID(id)) {
         res.status(400).json({ error: "Invalid todo ID" });
         return;
       }
 
       const todo = await prisma.todo.findUnique({
-        where: { id: todoId },
+        where: { id: id },
       });
 
       if (todo == null) {
@@ -359,7 +349,7 @@ export class TodosController {
       const comment = await prisma.comment.findFirst({
         where: {
           id: commentIdNum,
-          todoId,
+          todoId: id,
         },
       });
 

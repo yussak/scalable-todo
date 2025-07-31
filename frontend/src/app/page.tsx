@@ -13,7 +13,7 @@ export default function Home() {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [editingTodo, setEditingTodo] = useState<{
-    id: number;
+    id: string;
     title: string;
     description: string;
     completed: boolean;
@@ -59,7 +59,7 @@ export default function Home() {
     }
   };
 
-  const deleteTodo = async (id: number) => {
+  const deleteTodo = async (id: string) => {
     if (!user?.id) return;
 
     try {
@@ -89,7 +89,7 @@ export default function Home() {
     setEditingTodo(null);
   };
 
-  const updateTodo = async (id: number) => {
+  const updateTodo = async (id: string) => {
     if (!editingTodo?.title.trim() || !user?.id) return;
 
     try {

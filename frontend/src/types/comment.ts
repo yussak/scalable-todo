@@ -1,7 +1,7 @@
 export interface Comment {
   id: number;
   content: string;
-  todoId: number;
+  todoId: string;
   userId: string;
   createdAt: string;
   updatedAt: string;

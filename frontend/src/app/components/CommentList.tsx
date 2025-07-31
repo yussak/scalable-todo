@@ -3,7 +3,7 @@ import api from "@/lib/api";
 import { Comment } from "@/types/comment";
 
 interface CommentListProps {
-  todoId: number;
+  todoId: string;
   refresh: number; // リフレッシュトリガー
 }
 

@@ -84,7 +84,10 @@ describe("GET /api/todos/:todoId/comments", () => {
   });
 
   it("should return 404 for non-existent todo", async () => {
-    await request(app).get("/api/todos/99999/comments").expect(404);
+    const nonExistentUuid = "550e8400-e29b-41d4-a716-446655440999";
+    await request(app)
+      .get(`/api/todos/${nonExistentUuid}/comments`)
+      .expect(404);
   });
 
   it("should return 400 for invalid todo ID", async () => {
@@ -122,7 +125,10 @@ describe("DELETE /api/todos/:todoId/comments/:commentId", () => {
   });
 
   it("should return 404 for non-existent todo", async () => {
-    await request(app).delete("/api/todos/99999/comments/1").expect(404);
+    const nonExistentUuid = "550e8400-e29b-41d4-a716-446655440999";
+    await request(app)
+      .delete(`/api/todos/${nonExistentUuid}/comments/1`)
+      .expect(404);
   });
 
   it("should return 400 for invalid todo ID", async () => {

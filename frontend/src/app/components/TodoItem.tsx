@@ -6,7 +6,7 @@ import { Todo } from "@/types/todo";
 interface TodoItemProps {
   todo: Todo;
   onEdit: (todo: Todo) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 export default function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {

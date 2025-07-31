@@ -2,7 +2,7 @@ import { useState } from "react";
 import api from "@/lib/api";
 
 interface CommentFormProps {
-  todoId: number;
+  todoId: string;
   onCommentAdd: () => void;
 }
 

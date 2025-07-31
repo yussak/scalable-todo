@@ -7,11 +7,11 @@ import { CommentForm } from "@/app/components/CommentForm";
 import { CommentList } from "@/app/components/CommentList";
 
 interface Todo {
-  id: number;
+  id: string;
   title: string;
   description: string | null;
   completed: boolean;
-  userId: number;
+  userId: string;
   createdAt: string;
   updatedAt: string;
 }
