@@ -22,7 +22,7 @@ router.put("/:id", (req: Request, res: Response) =>
 );
 
 router.delete("/:id", (req: Request, res: Response) =>
-  todosController.deleteTodo(req, res)
+  TodosFuncController.deleteTodo(req, res)
 );
 
 router.post("/:id/comments", (req: Request, res: Response) =>

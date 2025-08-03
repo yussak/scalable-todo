@@ -633,7 +633,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: "invalid" };
       mockRequest.body = { userId: mockUserId };
 
-      await todosController.deleteTodo(
+      await TodosFuncController.deleteTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -645,7 +645,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = {};
 
-      await todosController.deleteTodo(
+      await TodosFuncController.deleteTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -657,7 +657,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { userId: 123 };
 
-      await todosController.deleteTodo(
+      await TodosFuncController.deleteTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -688,7 +688,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { userId: mockUserId };
 
-      await todosController.deleteTodo(
+      await TodosFuncController.deleteTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -712,7 +712,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { userId: mockUserId };
 
-      await todosController.deleteTodo(
+      await TodosFuncController.deleteTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -727,7 +727,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { userId: mockUserId };
 
-      await todosController.deleteTodo(
+      await TodosFuncController.deleteTodo(
         mockRequest as Request,
         mockResponse as Response
       );

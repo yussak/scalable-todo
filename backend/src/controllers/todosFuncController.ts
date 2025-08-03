@@ -164,4 +164,45 @@ export const TodosFuncController = {
       }
     }
   },
+
+  async deleteTodo(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { userId } = req.body;
+
+      if (!isValidUUID(id)) {
+        res.status(400).json({ error: "Invalid todo ID" });
+        return;
+      }
+
+      if (userId == null || typeof userId !== "string") {
+        res.status(400).json({ error: "userId is required" });
+        return;
+      }
+
+      await prisma.todo.delete({
+        where: { id: id, userId: userId },
+      });
+
+      const remainingTodos = await prisma.todo.findMany({
+        where: { userId: userId },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+      });
+
+      res.json(remainingTodos);
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "P2025"
+      ) {
+        res.status(404).json({ error: "Todo not found" });
+      } else {
+        console.error("Error deleting todo:", error);
+        res.status(500).json({ error: "Failed to delete todo" });
+      }
+    }
+  },
 };
