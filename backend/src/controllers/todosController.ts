@@ -39,56 +39,6 @@ export class TodosController {
     }
   }
 
-  async createComment(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { content } = req.body;
-
-      if (content == null) {
-        res.status(400).json({ error: "Content is required" });
-        return;
-      }
-
-      if (typeof content !== "string") {
-        res.status(400).json({ error: "Content must be a string" });
-        return;
-      }
-
-      if (content.trim().length === 0) {
-        res.status(400).json({ error: "Content is required" });
-        return;
-      }
-
-      if (!isValidUUID(id)) {
-        res.status(400).json({ error: "Invalid todo ID or todo not found" });
-        return;
-      }
-
-      const todo = await prisma.todo.findUnique({
-        where: { id: id },
-      });
-
-      if (todo == null) {
-        res.status(400).json({ error: "Invalid todo ID or todo not found" });
-        return;
-      }
-
-      const comment = await prisma.comment.create({
-        data: {
-          content,
-          todoId: id,
-          userId: todo.userId,
-        },
-        include: { user: true },
-      });
-
-      res.status(201).json(comment);
-    } catch (error) {
-      console.error("Error creating comment:", error);
-      res.status(500).json({ error: "Failed to create comment" });
-    }
-  }
-
   async getComments(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;

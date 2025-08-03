@@ -741,7 +741,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = {};
 
-      await todosController.createComment(
+      await TodosFuncController.createComment(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -753,7 +753,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { content: "" };
 
-      await todosController.createComment(
+      await TodosFuncController.createComment(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -765,7 +765,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { content: "   " };
 
-      await todosController.createComment(
+      await TodosFuncController.createComment(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -777,7 +777,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: "invalid" };
       mockRequest.body = { content: "Test comment" };
 
-      await todosController.createComment(
+      await TodosFuncController.createComment(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -790,7 +790,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { content: "Test comment" };
 
-      await todosController.createComment(
+      await TodosFuncController.createComment(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -826,7 +826,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { content: "Test comment" };
 
-      await todosController.createComment(
+      await TodosFuncController.createComment(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -860,7 +860,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { content: "Test comment" };
 
-      await todosController.createComment(
+      await TodosFuncController.createComment(
         mockRequest as Request,
         mockResponse as Response
       );

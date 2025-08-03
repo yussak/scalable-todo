@@ -26,7 +26,7 @@ router.delete("/:id", (req: Request, res: Response) =>
 );
 
 router.post("/:id/comments", (req: Request, res: Response) =>
-  todosController.createComment(req, res)
+  TodosFuncController.createComment(req, res)
 );
 
 router.get("/:id/comments", (req: Request, res: Response) =>
