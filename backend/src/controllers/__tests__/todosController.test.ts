@@ -291,7 +291,7 @@ describe("TodosController", () => {
     it("should return 400 when title is not provided", async () => {
       mockRequest.body = { userId: mockUserId };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -302,7 +302,7 @@ describe("TodosController", () => {
     it("should return 400 when title is empty string", async () => {
       mockRequest.body = { title: "", userId: mockUserId };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -313,7 +313,7 @@ describe("TodosController", () => {
     it("should return 400 when title is only whitespace", async () => {
       mockRequest.body = { title: "   ", userId: mockUserId };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -324,7 +324,7 @@ describe("TodosController", () => {
     it("should return 400 when userId is not provided", async () => {
       mockRequest.body = { title: "Test Todo" };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -335,7 +335,7 @@ describe("TodosController", () => {
     it("should return 400 when userId is not a string", async () => {
       mockRequest.body = { title: "Test Todo", userId: 123 };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -346,7 +346,7 @@ describe("TodosController", () => {
     it("should return 400 when userId is empty string", async () => {
       mockRequest.body = { title: "Test Todo", userId: "" };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -372,7 +372,7 @@ describe("TodosController", () => {
       (prisma.todo.create as any).mockResolvedValue(mockCreatedTodo);
       mockRequest.body = { title: "Test Todo", userId: mockUserId };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -411,7 +411,7 @@ describe("TodosController", () => {
         userId: mockUserId,
       };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -434,7 +434,7 @@ describe("TodosController", () => {
       );
       mockRequest.body = { title: "Test Todo", userId: mockUserId };
 
-      await todosController.createTodo(
+      await TodosFuncController.createTodo(
         mockRequest as Request,
         mockResponse as Response
       );
