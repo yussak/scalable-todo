@@ -286,4 +286,51 @@ export const TodosFuncController = {
       res.status(500).json({ error: "Failed to fetch comments" });
     }
   },
+
+  async deleteComment(req: Request, res: Response): Promise<void> {
+    try {
+      const { id, commentId } = req.params;
+
+      if (!isValidUUID(id)) {
+        res.status(400).json({ error: "Invalid todo ID" });
+        return;
+      }
+
+      const todo = await prisma.todo.findUnique({
+        where: { id: id },
+      });
+
+      if (todo == null) {
+        res.status(404).json({ error: "Todo not found" });
+        return;
+      }
+
+      const commentIdNum = parseInt(commentId, 10);
+      if (isNaN(commentIdNum)) {
+        res.status(400).json({ error: "Invalid comment ID" });
+        return;
+      }
+
+      const comment = await prisma.comment.findFirst({
+        where: {
+          id: commentIdNum,
+          todoId: id,
+        },
+      });
+
+      if (comment == null) {
+        res.status(404).json({ error: "Comment not found" });
+        return;
+      }
+
+      await prisma.comment.delete({
+        where: { id: commentIdNum },
+      });
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).json({ error: "Failed to delete comment" });
+    }
+  },
 };

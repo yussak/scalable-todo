@@ -34,7 +34,7 @@ router.get("/:id/comments", (req: Request, res: Response) =>
 );
 
 router.delete("/:id/comments/:commentId", (req: Request, res: Response) =>
-  todosController.deleteComment(req, res)
+  TodosFuncController.deleteComment(req, res)
 );
 
 export default router;
