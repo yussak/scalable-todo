@@ -1,38 +1,38 @@
 import { Router, Request, Response } from "express";
-import { TodosFuncController } from "../controllers/todosFuncController.js";
+import { todosController } from "../controllers/todosController.js";
 
 const router = Router();
 
 router.get("/", (req: Request, res: Response) =>
-  TodosFuncController.getTodos(req, res)
+  todosController.getTodos(req, res)
 );
 
 router.get("/:id", (req: Request, res: Response) =>
-  TodosFuncController.getTodoById(req, res)
+  todosController.getTodoById(req, res)
 );
 
 router.post("/", (req: Request, res: Response) =>
-  TodosFuncController.createTodo(req, res)
+  todosController.createTodo(req, res)
 );
 
 router.put("/:id", (req: Request, res: Response) =>
-  TodosFuncController.updateTodo(req, res)
+  todosController.updateTodo(req, res)
 );
 
 router.delete("/:id", (req: Request, res: Response) =>
-  TodosFuncController.deleteTodo(req, res)
+  todosController.deleteTodo(req, res)
 );
 
 router.post("/:id/comments", (req: Request, res: Response) =>
-  TodosFuncController.createComment(req, res)
+  todosController.createComment(req, res)
 );
 
 router.get("/:id/comments", (req: Request, res: Response) =>
-  TodosFuncController.getComments(req, res)
+  todosController.getComments(req, res)
 );
 
 router.delete("/:id/comments/:commentId", (req: Request, res: Response) =>
-  TodosFuncController.deleteComment(req, res)
+  todosController.deleteComment(req, res)
 );
 
 export default router;

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../prisma.js";
 import { isValidUUID } from "../utils/uuid.js";
 
-export const TodosFuncController = {
+export const todosController = {
   async createTodo(req: Request, res: Response): Promise<void> {
     try {
       const { title, description, userId } = req.body;
