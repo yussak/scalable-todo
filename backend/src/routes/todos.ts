@@ -18,7 +18,7 @@ router.post("/", (req: Request, res: Response) =>
 );
 
 router.put("/:id", (req: Request, res: Response) =>
-  todosController.updateTodo(req, res)
+  TodosFuncController.updateTodo(req, res)
 );
 
 router.delete("/:id", (req: Request, res: Response) =>
