@@ -873,7 +873,7 @@ describe("TodosController", () => {
     it("should return 400 when todo ID is invalid", async () => {
       mockRequest.params = { id: "invalid" };
 
-      await todosController.getComments(
+      await TodosFuncController.getComments(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -885,7 +885,7 @@ describe("TodosController", () => {
       (prisma.todo.findUnique as any).mockResolvedValue(null);
       mockRequest.params = { id: mockTodoId };
 
-      await todosController.getComments(
+      await TodosFuncController.getComments(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -934,7 +934,7 @@ describe("TodosController", () => {
 
       mockRequest.params = { id: mockTodoId };
 
-      await todosController.getComments(
+      await TodosFuncController.getComments(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -961,7 +961,7 @@ describe("TodosController", () => {
 
       mockRequest.params = { id: mockTodoId };
 
-      await todosController.getComments(
+      await TodosFuncController.getComments(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -987,7 +987,7 @@ describe("TodosController", () => {
 
       mockRequest.params = { id: mockTodoId };
 
-      await todosController.getComments(
+      await TodosFuncController.getComments(
         mockRequest as Request,
         mockResponse as Response
       );

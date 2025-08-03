@@ -30,7 +30,7 @@ router.post("/:id/comments", (req: Request, res: Response) =>
 );
 
 router.get("/:id/comments", (req: Request, res: Response) =>
-  todosController.getComments(req, res)
+  TodosFuncController.getComments(req, res)
 );
 
 router.delete("/:id/comments/:commentId", (req: Request, res: Response) =>
