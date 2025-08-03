@@ -13,26 +13,6 @@ export function CommentList({ todoId, refresh }: CommentListProps) {
   const [error, setError] = useState<string | null>(null);
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
 
-  const fetchComments = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get(`/todos/${todoId}/comments`);
-
-      if (response.ok) {
-        const data = await response.json();
-        setComments(data);
-        setError(null);
-      } else {
-        setError("コメントの取得に失敗しました");
-      }
-    } catch (err) {
-      console.error("Failed to fetch comments:", err);
-      setError("コメントの取得でエラーが発生しました");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteComment = async (commentId: number) => {
     try {
       setDeletingIds((prev) => new Set(prev).add(commentId));
@@ -62,6 +42,26 @@ export function CommentList({ todoId, refresh }: CommentListProps) {
   };
 
   useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/todos/${todoId}/comments`);
+
+        if (response.ok) {
+          const data = await response.json();
+          setComments(data);
+          setError(null);
+        } else {
+          setError("コメントの取得に失敗しました");
+        }
+      } catch (err) {
+        console.error("Failed to fetch comments:", err);
+        setError("コメントの取得でエラーが発生しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchComments();
   }, [todoId, refresh]);
 
