@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Request, Response } from "express";
-import { TodosController } from "../todosController";
 import { TodosFuncController } from "../todosFuncController";
 import { TodoModel } from "../../models/todoModel";
 import prisma from "../../prisma";
@@ -30,13 +29,12 @@ vi.mock("../../prisma", () => ({
   },
 }));
 
-describe("TodosController", () => {
+describe("TodosFuncController", () => {
   const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
   const mockUserId2 = "550e8400-e29b-41d4-a716-446655440001";
   const mockTodoId = "660e8400-e29b-41d4-a716-446655440000";
   const mockCommentId = 1;
 
-  let todosController: TodosController;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let jsonMock: any;
@@ -49,7 +47,6 @@ describe("TodosController", () => {
     };
     (TodoModel as any).mockImplementation(() => mockTodoModel);
 
-    todosController = new TodosController();
     jsonMock = vi.fn();
     statusMock = vi.fn().mockReturnThis();
 

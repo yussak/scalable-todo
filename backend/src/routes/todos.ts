@@ -1,9 +1,7 @@
 import { Router, Request, Response } from "express";
-import { TodosController } from "../controllers/todosController.js";
 import { TodosFuncController } from "../controllers/todosFuncController.js";
 
 const router = Router();
-const todosController = new TodosController();
 
 router.get("/", (req: Request, res: Response) =>
   TodosFuncController.getTodos(req, res)
