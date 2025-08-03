@@ -71,7 +71,7 @@ describe("TodosController", () => {
     it("should return 400 when userId is not provided", async () => {
       mockRequest.query = {};
 
-      await todosController.getTodos(
+      await TodosFuncController.getTodos(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -82,7 +82,7 @@ describe("TodosController", () => {
     it("should return 400 when userId is empty string", async () => {
       mockRequest.query = { userId: "" };
 
-      await todosController.getTodos(
+      await TodosFuncController.getTodos(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -93,7 +93,7 @@ describe("TodosController", () => {
     it("should return 400 when userId is not a string", async () => {
       mockRequest.query = { userId: 123 };
 
-      await todosController.getTodos(
+      await TodosFuncController.getTodos(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -104,7 +104,7 @@ describe("TodosController", () => {
     it("should return 400 when userId is whitespace only", async () => {
       mockRequest.query = { userId: "   " };
 
-      await todosController.getTodos(
+      await TodosFuncController.getTodos(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -129,25 +129,29 @@ describe("TodosController", () => {
         },
       ];
 
-      mockTodoModel.getTodosByUserId.mockResolvedValue(mockTodos);
+      (prisma.todo.findMany as any).mockResolvedValue(mockTodos);
       mockRequest.query = { userId: mockUserId };
 
-      await todosController.getTodos(
+      await TodosFuncController.getTodos(
         mockRequest as Request,
         mockResponse as Response
       );
 
-      expect(mockTodoModel.getTodosByUserId).toHaveBeenCalledWith(mockUserId);
+      expect(prisma.todo.findMany).toHaveBeenCalledWith({
+        where: { userId: mockUserId },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+      });
       expect(jsonMock).toHaveBeenCalledWith(mockTodos);
     });
 
     it("should return 500 when database error occurs", async () => {
-      mockTodoModel.getTodosByUserId.mockRejectedValue(
+      (prisma.todo.findMany as any).mockRejectedValue(
         new Error("Database error")
       );
       mockRequest.query = { userId: mockUserId };
 
-      await todosController.getTodos(
+      await TodosFuncController.getTodos(
         mockRequest as Request,
         mockResponse as Response
       );

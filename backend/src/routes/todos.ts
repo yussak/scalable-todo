@@ -6,7 +6,7 @@ const router = Router();
 const todosController = new TodosController();
 
 router.get("/", (req: Request, res: Response) =>
-  todosController.getTodos(req, res)
+  TodosFuncController.getTodos(req, res)
 );
 
 router.get("/:id", (req: Request, res: Response) =>
