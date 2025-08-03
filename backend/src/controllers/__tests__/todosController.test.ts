@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Request, Response } from "express";
 import { TodosController } from "../todosController";
+import { TodosFuncController } from "../todosFuncController";
 import { TodoModel } from "../../models/todoModel";
 import prisma from "../../prisma";
 
@@ -447,7 +448,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: "invalid" };
       mockRequest.body = { title: "Updated Todo", userId: mockUserId };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -459,7 +460,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { userId: mockUserId };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -471,7 +472,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { title: "", userId: mockUserId };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -483,7 +484,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { title: "   ", userId: mockUserId };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -495,7 +496,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { title: "Updated Todo" };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -507,7 +508,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { title: "Updated Todo", userId: 123 };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -539,7 +540,7 @@ describe("TodosController", () => {
         userId: mockUserId,
       };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -578,7 +579,7 @@ describe("TodosController", () => {
         userId: mockUserId,
       };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -603,7 +604,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { title: "Updated Todo", userId: mockUserId };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -618,7 +619,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.body = { title: "Updated Todo", userId: mockUserId };
 
-      await todosController.updateTodo(
+      await TodosFuncController.updateTodo(
         mockRequest as Request,
         mockResponse as Response
       );
