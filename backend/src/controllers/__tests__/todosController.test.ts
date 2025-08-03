@@ -161,7 +161,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = {};
 
-      await todosController.getTodoById(
+      await TodosFuncController.getTodoById(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -173,7 +173,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: "" };
 
-      await todosController.getTodoById(
+      await TodosFuncController.getTodoById(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -185,7 +185,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: 123 };
 
-      await todosController.getTodoById(
+      await TodosFuncController.getTodoById(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -197,7 +197,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: "invalid" };
       mockRequest.query = { userId: mockUserId };
 
-      await todosController.getTodoById(
+      await TodosFuncController.getTodoById(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -209,7 +209,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: "   " };
 
-      await todosController.getTodoById(
+      await TodosFuncController.getTodoById(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -222,7 +222,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: mockUserId };
 
-      await todosController.getTodoById(
+      await TodosFuncController.getTodoById(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -256,7 +256,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: mockUserId };
 
-      await todosController.getTodoById(
+      await TodosFuncController.getTodoById(
         mockRequest as Request,
         mockResponse as Response
       );
@@ -278,7 +278,7 @@ describe("TodosController", () => {
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: mockUserId };
 
-      await todosController.getTodoById(
+      await TodosFuncController.getTodoById(
         mockRequest as Request,
         mockResponse as Response
       );
