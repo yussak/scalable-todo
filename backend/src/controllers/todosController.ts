@@ -39,56 +39,6 @@ export class TodosController {
     }
   }
 
-  async createTodo(req: Request, res: Response): Promise<void> {
-    try {
-      const { title, description, userId } = req.body;
-
-      if (title == null) {
-        res.status(400).json({ error: "Title is required" });
-        return;
-      }
-
-      if (typeof title !== "string") {
-        res.status(400).json({ error: "Title must be a string" });
-        return;
-      }
-
-      if (title.trim().length === 0) {
-        res.status(400).json({ error: "Title is required" });
-        return;
-      }
-
-      if (userId == null) {
-        res.status(400).json({ error: "userId is required" });
-        return;
-      }
-
-      if (typeof userId !== "string") {
-        res.status(400).json({ error: "userId must be a string" });
-        return;
-      }
-
-      if (userId.trim().length === 0) {
-        res.status(400).json({ error: "userId must not be empty" });
-        return;
-      }
-
-      const todo = await prisma.todo.create({
-        data: {
-          title,
-          description: description || null,
-          userId: userId,
-        },
-        include: { user: true },
-      });
-
-      res.status(201).json(todo);
-    } catch (error) {
-      console.error("Error creating todo:", error);
-      res.status(500).json({ error: "Failed to create todo" });
-    }
-  }
-
   async updateTodo(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
