@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../prisma.js";
+import { todosModel } from "../models/todoModel.js";
 import { isValidUUID } from "../utils/uuid.js";
 
 export const todosController = {
@@ -37,14 +38,11 @@ export const todosController = {
         return;
       }
 
-      const todo = await prisma.todo.create({
-        data: {
-          title,
-          description: description || null,
-          userId: userId,
-        },
-        include: { user: true },
-      });
+      const todo = await todosModel.createTodo(
+        title,
+        description || null,
+        userId
+      );
 
       res.status(201).json(todo);
     } catch (error) {

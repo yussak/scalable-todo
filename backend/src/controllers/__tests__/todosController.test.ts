@@ -1,13 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Request, Response } from "express";
-import { todosController } from "../todosController";
-import { TodoModel } from "../../models/todoModel";
-import prisma from "../../prisma";
 
 vi.mock("../../models/todoModel", () => ({
-  TodoModel: vi.fn().mockImplementation(() => ({
-    getTodosByUserId: vi.fn(),
-  })),
+  todosModel: {
+    createTodo: vi.fn(),
+  },
 }));
 
 vi.mock("../../prisma", () => ({
@@ -29,6 +26,10 @@ vi.mock("../../prisma", () => ({
   },
 }));
 
+import { todosController } from "../todosController";
+import { todosModel } from "../../models/todoModel";
+import prisma from "../../prisma";
+
 describe("todosController", () => {
   const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
   const mockUserId2 = "550e8400-e29b-41d4-a716-446655440001";
@@ -39,13 +40,9 @@ describe("todosController", () => {
   let mockResponse: Partial<Response>;
   let jsonMock: any;
   let statusMock: any;
-  let mockTodoModel: any;
 
   beforeEach(() => {
-    mockTodoModel = {
-      getTodosByUserId: vi.fn(),
-    };
-    (TodoModel as any).mockImplementation(() => mockTodoModel);
+    vi.clearAllMocks();
 
     jsonMock = vi.fn();
     statusMock = vi.fn().mockReturnThis();
@@ -60,8 +57,6 @@ describe("todosController", () => {
       json: jsonMock,
       status: statusMock,
     };
-
-    vi.clearAllMocks();
   });
 
   describe("getTodos", () => {
@@ -370,7 +365,7 @@ describe("todosController", () => {
         },
       };
 
-      (prisma.todo.create as any).mockResolvedValue(mockCreatedTodo);
+      todosModel.createTodo.mockResolvedValue(mockCreatedTodo);
       mockRequest.body = { title: "Test Todo", userId: mockUserId };
 
       await todosController.createTodo(
@@ -378,14 +373,11 @@ describe("todosController", () => {
         mockResponse as Response
       );
 
-      expect(prisma.todo.create).toHaveBeenCalledWith({
-        data: {
-          title: "Test Todo",
-          description: null,
-          userId: mockUserId,
-        },
-        include: { user: true },
-      });
+      expect(todosModel.createTodo).toHaveBeenCalledWith(
+        "Test Todo",
+        null,
+        mockUserId
+      );
       expect(statusMock).toHaveBeenCalledWith(201);
       expect(jsonMock).toHaveBeenCalledWith(mockCreatedTodo);
     });
@@ -405,7 +397,7 @@ describe("todosController", () => {
         },
       };
 
-      (prisma.todo.create as any).mockResolvedValue(mockCreatedTodo);
+      todosModel.createTodo.mockResolvedValue(mockCreatedTodo);
       mockRequest.body = {
         title: "Test Todo",
         description: "Test Description",
@@ -417,22 +409,17 @@ describe("todosController", () => {
         mockResponse as Response
       );
 
-      expect(prisma.todo.create).toHaveBeenCalledWith({
-        data: {
-          title: "Test Todo",
-          description: "Test Description",
-          userId: mockUserId,
-        },
-        include: { user: true },
-      });
+      expect(todosModel.createTodo).toHaveBeenCalledWith(
+        "Test Todo",
+        "Test Description",
+        mockUserId
+      );
       expect(statusMock).toHaveBeenCalledWith(201);
       expect(jsonMock).toHaveBeenCalledWith(mockCreatedTodo);
     });
 
     it("should return 500 when database error occurs", async () => {
-      (prisma.todo.create as any).mockRejectedValue(
-        new Error("Database error")
-      );
+      todosModel.createTodo.mockRejectedValue(new Error("Database error"));
       mockRequest.body = { title: "Test Todo", userId: mockUserId };
 
       await todosController.createTodo(
