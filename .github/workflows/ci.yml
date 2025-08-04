@@ -98,9 +98,13 @@ jobs:
 
       - name: Run tests
         run: cd frontend && yarn test:run
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Generate coverage report
         run: cd frontend && yarn test:coverage
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
