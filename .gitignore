@@ -56,3 +56,6 @@ terraform.tfvars
 override.tf
 override.tf.json
 
+
+.serena/cache
+.serena/memories
