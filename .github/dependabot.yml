@@ -1,0 +1,31 @@
+version: 2
+updates:
+  # Enable version updates for npm packages in root directory
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Enable version updates for npm packages in frontend directory
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+
+  # Enable version updates for npm packages in backend directory
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+
+  # todo: Enable version updates for Docker
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+
+  # todo: Enable version updates for GitHub Actions
+  # - package-ecosystem: "github-actions"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
