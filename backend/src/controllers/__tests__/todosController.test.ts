@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 vi.mock("../../models/todoModel", () => ({
   todosModel: {
     createTodo: vi.fn(),
+    getTodoById: vi.fn(),
   },
 }));
 
@@ -214,7 +215,7 @@ describe("todosController", () => {
     });
 
     it("should return 404 when todo is not found", async () => {
-      (prisma.todo.findFirst as any).mockResolvedValue(null);
+      todosModel.getTodoById.mockResolvedValue(null);
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: mockUserId };
 
@@ -223,13 +224,10 @@ describe("todosController", () => {
         mockResponse as Response
       );
 
-      expect(prisma.todo.findFirst).toHaveBeenCalledWith({
-        where: {
-          id: mockTodoId,
-          userId: mockUserId,
-        },
-        include: { user: true },
-      });
+      expect(todosModel.getTodoById).toHaveBeenCalledWith(
+        mockTodoId,
+        mockUserId
+      );
       expect(statusMock).toHaveBeenCalledWith(404);
     });
 
@@ -248,7 +246,7 @@ describe("todosController", () => {
         },
       };
 
-      (prisma.todo.findFirst as any).mockResolvedValue(mockTodo);
+      todosModel.getTodoById.mockResolvedValue(mockTodo);
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: mockUserId };
 
@@ -257,20 +255,15 @@ describe("todosController", () => {
         mockResponse as Response
       );
 
-      expect(prisma.todo.findFirst).toHaveBeenCalledWith({
-        where: {
-          id: mockTodoId,
-          userId: mockUserId,
-        },
-        include: { user: true },
-      });
+      expect(todosModel.getTodoById).toHaveBeenCalledWith(
+        mockTodoId,
+        mockUserId
+      );
       expect(jsonMock).toHaveBeenCalledWith(mockTodo);
     });
 
     it("should return 500 when database error occurs", async () => {
-      (prisma.todo.findFirst as any).mockRejectedValue(
-        new Error("Database error")
-      );
+      todosModel.getTodoById.mockRejectedValue(new Error("Database error"));
       mockRequest.params = { id: mockTodoId };
       mockRequest.query = { userId: mockUserId };
 

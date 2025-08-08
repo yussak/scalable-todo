@@ -76,13 +76,7 @@ export const todosController = {
         return;
       }
 
-      const todo = await prisma.todo.findFirst({
-        where: {
-          id: id,
-          userId: userId,
-        },
-        include: { user: true },
-      });
+      const todo = await todosModel.getTodoById(id, userId);
 
       if (todo == null) {
         res.status(404).json({ error: "Todo not found" });

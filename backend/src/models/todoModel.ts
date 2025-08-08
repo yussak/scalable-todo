@@ -20,4 +20,14 @@ export const todosModel = {
       include: { user: true },
     });
   },
+
+  async getTodoById(id: string, userId: string): Promise<TodoWithUser | null> {
+    return await prisma.todo.findFirst({
+      where: {
+        id: id,
+        userId: userId,
+      },
+      include: { user: true },
+    });
+  },
 };
