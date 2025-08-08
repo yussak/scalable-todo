@@ -5,18 +5,24 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # 仮で2個に制限している
+    open-pull-requests-limit: 2
 
   # Enable version updates for npm packages in frontend directory
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
       interval: "weekly"
+    # 仮で2個に制限している
+    open-pull-requests-limit: 2
 
   # Enable version updates for npm packages in backend directory
   - package-ecosystem: "npm"
     directory: "/backend"
     schedule:
       interval: "weekly"
+    # 仮で2個に制限している
+    open-pull-requests-limit: 2
 
   # todo: Enable version updates for Docker
   # - package-ecosystem: "docker"
