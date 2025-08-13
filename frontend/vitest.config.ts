@@ -27,13 +27,6 @@ export default defineConfig({
       ],
       include: ["src/**/*.{ts,tsx}"],
       all: true,
-      // todo: 後で動かす
-      // thresholds: {
-      //   lines: 80,
-      //   functions: 80,
-      //   branches: 70,
-      //   statements: 80,
-      // },
     },
   },
   resolve: {
