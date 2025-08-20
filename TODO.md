@@ -11,3 +11,4 @@
 - todo オニオンアーキテクチャに移行
 - tfファイルのis deprecatedの対応
 - Feature Flag試す
+- dependabot経由でCIが落ちるので治す（環境変数が読めない）
