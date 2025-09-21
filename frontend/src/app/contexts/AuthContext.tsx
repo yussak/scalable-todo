@@ -10,7 +10,7 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 
 interface User {
-  id: number;
+  id: string;
   email: string;
 }
 

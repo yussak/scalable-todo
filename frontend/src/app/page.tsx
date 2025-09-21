@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useTransition } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import TodoForm from "./components/TodoForm";
 import TodoItem from "./components/TodoItem";
+import { getTodosAction, TodoWithUser } from "./actions/todos";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import api from "@/lib/api";
 import { Todo } from "@/types/todo";
 
@@ -13,9 +14,9 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const todosPerPage = 10;
+  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [isPending, startTransition] = useTransition();
   const [editingTodo, setEditingTodo] = useState<{
     id: string;
     title: string;
@@ -23,30 +24,45 @@ export default function Home() {
     completed: boolean;
   } | null>(null);
   const { user } = useAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
-  const fetchTodos = useCallback(
-    async (page: number = currentPage) => {
-      if (!user?.id) return;
+  const loadTodos = async (reset = false) => {
+    if (!user?.id || loading) return;
 
-      try {
-        const response = await api.get(
-          `/todos?userId=${user.id}&page=${page}&limit=${todosPerPage}`
+    setLoading(true);
+    try {
+      startTransition(async () => {
+        const result = await getTodosAction(
+          user.id,
+          reset ? undefined : cursor,
+          20
         );
-        if (response.ok) {
-          const data = await response.json();
-          setTodos(data.todos);
-          setTotalPages(data.pagination.totalPages);
-          setTotalCount(data.pagination.totalCount);
+
+        const convertedTodos = result.todos.map((todo) => ({
+          ...todo,
+          user: { id: todo.user.id, email: todo.user.email },
+        }));
+
+        if (reset) {
+          setTodos(convertedTodos);
+        } else {
+          setTodos((prev) => [...prev, ...convertedTodos]);
         }
-      } catch (error) {
-        console.error("Failed to fetch todos:", error);
-      }
-    },
-    [user?.id, currentPage, todosPerPage]
-  );
+
+        setHasMore(result.hasMore);
+        setCursor(result.nextCursor);
+      });
+    } catch (error) {
+      console.error("Failed to fetch todos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const { loadingElementRef } = useInfiniteScroll({
+    hasMore,
+    loading: loading || isPending,
+    onLoadMore: () => loadTodos(false),
+  });
 
   const createTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +79,8 @@ export default function Home() {
       if (response.ok) {
         setTitle("");
         setDescription("");
-        router.push("/?page=1");
+        setCursor(undefined);
+        loadTodos(true);
       }
     } catch (error) {
       console.error("Failed to create todo:", error);
@@ -81,7 +98,7 @@ export default function Home() {
       });
 
       if (response.ok) {
-        fetchTodos(currentPage);
+        setTodos((prev) => prev.filter((todo) => todo.id !== id));
       }
     } catch (error) {
       console.error("Failed to delete todo:", error);
@@ -114,7 +131,9 @@ export default function Home() {
 
       if (response.ok) {
         const updatedTodo = await response.json();
-        setTodos(todos.map((todo) => (todo.id === id ? updatedTodo : todo)));
+        setTodos((prev) =>
+          prev.map((todo) => (todo.id === id ? updatedTodo : todo))
+        );
         cancelEdit();
       }
     } catch (error) {
@@ -122,27 +141,11 @@ export default function Home() {
     }
   };
 
-  const handlePageChange = (page: number) => {
-    router.push(`/?page=${page}`);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      handlePageChange(currentPage + 1);
-    }
-  };
-
   useEffect(() => {
     if (user?.id) {
-      fetchTodos(currentPage);
+      loadTodos(true);
     }
-  }, [user?.id, currentPage, fetchTodos]);
+  }, [user?.id]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -202,7 +205,8 @@ export default function Home() {
       <div className="flex gap-2">
         <button
           onClick={() => updateTodo(todo.id)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isPending}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         >
           保存
         </button>
@@ -224,12 +228,12 @@ export default function Home() {
           setTitle={setTitle}
           description={description}
           setDescription={setDescription}
-          loading={loading}
+          loading={loading || isPending}
           onSubmit={createTodo}
         />
 
         <div className="space-y-4">
-          {todos.length === 0 ? (
+          {todos.length === 0 && !loading ? (
             <div className="text-center text-gray-500 py-8">
               TODOがありません
             </div>
@@ -252,49 +256,26 @@ export default function Home() {
                 </div>
               ))}
 
-              {/* ページネーション */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
-                  <button
-                    onClick={handlePrevPage}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    前へ
-                  </button>
-
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (page) => (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`px-3 py-2 text-sm font-medium rounded-md ${
-                            currentPage === page
-                              ? "text-white bg-blue-600 hover:bg-blue-700"
-                              : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      )
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    次へ
-                  </button>
+              {/* 無限スクロール用のローディング要素 */}
+              {hasMore && (
+                <div
+                  ref={loadingElementRef}
+                  className="flex justify-center py-8"
+                >
+                  {(loading || isPending) && (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                      <span className="text-gray-500">読み込み中...</span>
+                    </div>
+                  )}
                 </div>
               )}
 
-              <div className="text-center text-sm text-gray-500 mt-4">
-                全 {totalCount} 件中 {(currentPage - 1) * todosPerPage + 1} -{" "}
-                {Math.min(currentPage * todosPerPage, totalCount)} 件を表示
-              </div>
+              {!hasMore && todos.length > 0 && (
+                <div className="text-center text-gray-500 py-8">
+                  すべてのTODOを読み込みました
+                </div>
+              )}
             </>
           )}
         </div>

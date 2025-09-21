@@ -14,7 +14,9 @@
     "test:coverage:ui": "vitest --coverage --ui"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.2",
     "next": "15.4.6",
+    "prisma": "^6.16.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
