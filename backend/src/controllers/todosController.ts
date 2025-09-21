@@ -328,7 +328,7 @@ export const todosController = {
 
   async getTodos(req: Request, res: Response): Promise<void> {
     try {
-      const { userId } = req.query;
+      const { userId, page = "1", limit = "10" } = req.query;
 
       if (userId == null) {
         res.status(400).json({ error: "userId is required" });
@@ -345,13 +345,45 @@ export const todosController = {
         return;
       }
 
-      const todos = await prisma.todo.findMany({
-        where: { userId },
-        include: { user: true },
-        orderBy: { createdAt: "desc" },
-      });
+      const pageNum = parseInt(page as string, 10);
+      const limitNum = parseInt(limit as string, 10);
 
-      res.json(todos);
+      if (isNaN(pageNum) || pageNum < 1) {
+        res.status(400).json({ error: "page must be a positive number" });
+        return;
+      }
+
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+        res.status(400).json({ error: "limit must be between 1 and 100" });
+        return;
+      }
+
+      const skip = (pageNum - 1) * limitNum;
+
+      const [todos, totalCount] = await Promise.all([
+        prisma.todo.findMany({
+          where: { userId },
+          include: { user: true },
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: limitNum,
+        }),
+        prisma.todo.count({
+          where: { userId },
+        }),
+      ]);
+
+      const totalPages = Math.ceil(totalCount / limitNum);
+
+      res.json({
+        todos,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalCount,
+          limit: limitNum,
+        },
+      });
     } catch (error) {
       console.error("Error fetching todos:", error);
       res.status(500).json({ error: "Failed to fetch todos" });

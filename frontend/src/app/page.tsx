@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "./contexts/AuthContext";
 import TodoForm from "./components/TodoForm";
 import TodoItem from "./components/TodoItem";
@@ -12,6 +13,9 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const todosPerPage = 10;
   const [editingTodo, setEditingTodo] = useState<{
     id: string;
     title: string;
@@ -19,21 +23,30 @@ export default function Home() {
     completed: boolean;
   } | null>(null);
   const { user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
-  const fetchTodos = useCallback(async () => {
-    if (!user?.id) return;
+  const fetchTodos = useCallback(
+    async (page: number = currentPage) => {
+      if (!user?.id) return;
 
-    try {
-      const response = await api.get(`/todos?userId=${user.id}`);
-      if (response.ok) {
-        const todos = await response.json();
-
-        setTodos(todos);
+      try {
+        const response = await api.get(
+          `/todos?userId=${user.id}&page=${page}&limit=${todosPerPage}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setTodos(data.todos);
+          setTotalPages(data.pagination.totalPages);
+          setTotalCount(data.pagination.totalCount);
+        }
+      } catch (error) {
+        console.error("Failed to fetch todos:", error);
       }
-    } catch (error) {
-      console.error("Failed to fetch todos:", error);
-    }
-  }, [user?.id]);
+    },
+    [user?.id, currentPage, todosPerPage]
+  );
 
   const createTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +63,7 @@ export default function Home() {
       if (response.ok) {
         setTitle("");
         setDescription("");
-        fetchTodos();
+        router.push("/?page=1");
       }
     } catch (error) {
       console.error("Failed to create todo:", error);
@@ -68,8 +81,7 @@ export default function Home() {
       });
 
       if (response.ok) {
-        const updatedTodos = await response.json();
-        setTodos(updatedTodos);
+        fetchTodos(currentPage);
       }
     } catch (error) {
       console.error("Failed to delete todo:", error);
@@ -110,11 +122,27 @@ export default function Home() {
     }
   };
 
+  const handlePageChange = (page: number) => {
+    router.push(`/?page=${page}`);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
   useEffect(() => {
     if (user?.id) {
-      fetchTodos();
+      fetchTodos(currentPage);
     }
-  }, [user?.id, fetchTodos]);
+  }, [user?.id, currentPage, fetchTodos]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -206,19 +234,68 @@ export default function Home() {
               TODOがありません
             </div>
           ) : (
-            todos.map((todo) => (
-              <div key={todo.id} className="bg-white rounded-lg shadow-md p-6">
-                {editingTodo?.id === todo.id ? (
-                  renderEditForm(todo)
-                ) : (
-                  <TodoItem
-                    todo={todo}
-                    onEdit={startEdit}
-                    onDelete={deleteTodo}
-                  />
-                )}
+            <>
+              {todos.map((todo) => (
+                <div
+                  key={todo.id}
+                  className="bg-white rounded-lg shadow-md p-6"
+                >
+                  {editingTodo?.id === todo.id ? (
+                    renderEditForm(todo)
+                  ) : (
+                    <TodoItem
+                      todo={todo}
+                      onEdit={startEdit}
+                      onDelete={deleteTodo}
+                    />
+                  )}
+                </div>
+              ))}
+
+              {/* ページネーション */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8">
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    前へ
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-2 text-sm font-medium rounded-md ${
+                            currentPage === page
+                              ? "text-white bg-blue-600 hover:bg-blue-700"
+                              : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      )
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    次へ
+                  </button>
+                </div>
+              )}
+
+              <div className="text-center text-sm text-gray-500 mt-4">
+                全 {totalCount} 件中 {(currentPage - 1) * todosPerPage + 1} -{" "}
+                {Math.min(currentPage * todosPerPage, totalCount)} 件を表示
               </div>
-            ))
+            </>
           )}
         </div>
       </div>
