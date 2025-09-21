@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import TodoForm from "./components/TodoForm";
 import TodoItem from "./components/TodoItem";
-import { getTodosAction, TodoWithUser } from "./actions/todos";
+import { getTodosAction } from "./actions/todos";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import api from "@/lib/api";
 import { Todo } from "@/types/todo";
